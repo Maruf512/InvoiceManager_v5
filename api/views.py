@@ -21,7 +21,7 @@ def add_employees(request):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=201)
 
         name = data.get('name')
         address = data.get('address')
@@ -74,11 +74,10 @@ def view_employees(request, pk):
 def update_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     serializer = EmployeeSerializer(employee, data=request.data)
-    print(request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP)
 
 
 # =======================
@@ -149,7 +148,6 @@ def view_all_customer(request, pk):
 def update_customer(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
     serializer = CustomerSerializer(customer, data=request.data)
-    print(request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -189,5 +187,96 @@ def add_catagory(request):
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
+
+# ======================
+# ===== View Catagory
+# ======================
+def view_catagory(request):
+    catagory = Catagory.objects.all()
+    serializer = CatagorySerializer(catagory, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+
+
+# =======================
+# ===== Delete Catagory
+# =======================
+def delete_catagory(request, pk):
+    catagory = get_object_or_404(Catagory, pk=pk)
+    catagory.delete()
+    return JsonResponse({'message': 'Removed Catagory from database.'}, status=201)
+
+
+
+# ====================== Products Section =====================
+# =======================
+# ===== Add Products
+# =======================
+@csrf_exempt
+def add_products(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+
+        name = data.get('name')
+        rate = data.get('rate')
+        catagory_id = data.get('catagory_id')
+
+        products = Products.objects.create(name=name, rate=rate, catagory_id=catagory_id)
+        products.save()
+        
+        return JsonResponse({'message': 'Products added successfully.'}, status=201)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+
+# =======================
+# ===== View Products
+# =======================
+def view_all_products(request, pk):
+    if pk > 0:
+        query = Products.objects.all()
+        limit = 10
+        offset = (pk - 1) * limit
+        number_of_pages = len(query)/limit
+        if offset + limit > len(query):
+            to_value = offset + (len(query) - offset)
+        else:
+            to_value = offset + limit
+
+        filter_records = query[offset:to_value]
+        if isinstance(number_of_pages, float):
+            number_of_pages = int(number_of_pages) + 1
+        
+        serializer = ProductsSerializer(filter_records, many=True)
+        return JsonResponse([{"total_page": number_of_pages}] + serializer.data, safe=False)
+
+
+
+# =======================
+# ===== Update Products
+# =======================
+@api_view(['PUT'])
+def update_products(request, pk):
+    products = get_object_or_404(Products, pk=pk)
+    serializer = ProductsSerializer(products, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# =======================
+# ===== Delete Products
+# =======================
+def delete_products(request, pk):
+    products = get_object_or_404(Products, pk=pk)
+    products.delete()
+    return JsonResponse({'message': 'Removed Products from database.'}, status=201)
 
 

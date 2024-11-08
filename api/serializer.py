@@ -11,7 +11,7 @@ class CatagorySerializer(serializers.ModelSerializer):
 class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        fields = '__all__'
+        fields = ['id', 'name', 'rate', 'catagory_id']
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
