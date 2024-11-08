@@ -238,6 +238,7 @@ def add_products(request):
 # ===== View Products
 # =======================
 def view_all_products(request, pk):
+    data = []
     if pk > 0:
         query = Products.objects.all()
         limit = 10
@@ -252,8 +253,11 @@ def view_all_products(request, pk):
         if isinstance(number_of_pages, float):
             number_of_pages = int(number_of_pages) + 1
         
-        serializer = ProductsSerializer(filter_records, many=True)
-        return JsonResponse([{"total_page": number_of_pages}] + serializer.data, safe=False)
+        for i in filter_records:
+            catagory_name = get_object_or_404(Catagory, pk=i.catagory_id)
+            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'catagory_name':catagory_name.name})
+
+        return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
 
 
