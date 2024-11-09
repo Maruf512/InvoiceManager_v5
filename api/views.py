@@ -62,7 +62,6 @@ def view_employees(request, pk):
             number_of_pages = int(number_of_pages) + 1
         
         serializer = EmployeeSerializer(filter_records, many=True)
-        print(serializer.data)
         return JsonResponse([{"total_page": number_of_pages}] + serializer.data, safe=False)
 
 
@@ -284,3 +283,57 @@ def delete_products(request, pk):
     return JsonResponse({'message': 'Removed Products from database.'}, status=201)
 
 
+
+# ====================== Production Section =====================
+# =======================
+# ===== Add Production
+# =======================
+@csrf_exempt
+def add_production(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+
+        products_id = data.get('products_id')
+        employee_id = data.get('employee_id')
+        quantity = data.get('quantity')
+        rate = data.get('rate')
+
+        production = Production.objects.create(products_id=products_id, employee_id=employee_id, quantity=quantity, rate=rate)
+        production.save()
+        
+        return JsonResponse({'message': 'Production added successfully.'}, status=201)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+
+
+# =======================
+# ===== View Production
+# =======================
+def view_all_production(request, pk):
+    data = []
+    if pk > 0:
+        query = Production.objects.all()
+        limit = 10
+        offset = (pk - 1) * limit
+        number_of_pages = len(query)/limit
+        if offset + limit > len(query):
+            to_value = offset + (len(query) - offset)
+        else:
+            to_value = offset + limit
+
+        filter_records = query[offset:to_value]
+        if isinstance(number_of_pages, float):
+            number_of_pages = int(number_of_pages) + 1
+        
+        for i in filter_records:
+            products = get_object_or_404(Products, pk=i.products_id)
+            employee = get_object_or_404(Employee, pk=i.employee_id)
+            data.append({'id': i.id, 'products':f"{products.name}({i.products_id})", "employee":f"{employee.name}({i.employee_id})", "quantity":i.quantity, 'rate': i.rate})
+
+        return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)

@@ -50,8 +50,8 @@ class Production(models.Model):
     id = models.BigAutoField(primary_key=True)
     products = models.ForeignKey('Products', models.DO_NOTHING)
     employee = models.ForeignKey(Employee, models.DO_NOTHING)
-    quantity = models.IntegerField()
-    rate = models.IntegerField()
+    quantity = models.FloatField()
+    rate = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
