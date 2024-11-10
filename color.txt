@@ -1,0 +1,9 @@
+icons color -- #79c142
+font color -- #cfcfcf
+hover font color -- #73b53f
+border color -- #649d38
+bg-color -- #020916
+
+table container bg color -- #0a1220
+table page changer bg -- #79c142
+table page changer font -- #111122

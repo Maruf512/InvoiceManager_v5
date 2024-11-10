@@ -80,7 +80,7 @@ def update_employee(request, pk):
 
 
 # =======================
-# ===== Update Employees
+# ===== Delete Employees
 # =======================
 def delete_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
@@ -334,6 +334,41 @@ def view_all_production(request, pk):
         for i in filter_records:
             products = get_object_or_404(Products, pk=i.products_id)
             employee = get_object_or_404(Employee, pk=i.employee_id)
-            data.append({'id': i.id, 'products':f"{products.name}({i.products_id})", "employee":f"{employee.name}({i.employee_id})", "quantity":i.quantity, 'rate': i.rate})
+            # data.append({'id': i.id, 'products':f"{products.name}({i.products_id})", "employee":f"{employee.name}({i.employee_id})", "quantity":i.quantity, 'rate': i.rate})
+            data.append({'id': i.id, 'products':{'id': i.products_id, 'name':products.name}, "employee":{'id':i.employee_id, 'name':employee.name}, "quantity":i.quantity, 'rate': i.rate})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
+
+
+
+# ========================
+# ===== Update Production
+# ========================
+@api_view(['PUT'])
+def update_production(request, pk):
+    production = get_object_or_404(Production, pk=pk)
+    serializer = ProductionSerializer(production, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# ====================== Dropdoen Section =====================
+# =============================
+# ===== Select Procuct Dropdown
+# =============================
+def select_product_dropdown(request):
+    data = []
+    queary = Products.objects.all()
+
+    for i in queary:
+        data.append({'id':i.id, 'name': i.name, 'rate': i.rate})
+
+    print(data)
+    
+    return JsonResponse(data=data, safe=False)
+
+
+

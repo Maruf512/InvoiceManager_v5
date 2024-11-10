@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
+
+ALLOWED_HOSTS = ['*']
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -53,7 +56,6 @@ MIDDLEWARE = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
 
 
 ROOT_URLCONF = 'InvoiceManager_v5.urls'

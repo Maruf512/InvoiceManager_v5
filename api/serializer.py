@@ -24,7 +24,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class ProductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Production
-        fields = '__all__'
+        fields = ['id', 'products_id', 'employee_id', 'quantity', 'rate']
 
 
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, select_product_dropdown, update_production
 
 urlpatterns = [
     # Catagory Routing
@@ -26,13 +26,17 @@ urlpatterns = [
     # Production Routing
     path('production/create/', add_production, name="add_production"),
     path('production/view/<int:pk>/', view_all_production, name="view_all_production"),
-    
+    path('production/update/<int:pk>/', update_production, name="Update Production"),
     
     # Customer Routing
     path('customer/create/', add_customer, name="add_customer"),
     path('customer/view/<int:pk>/', view_all_customer, name="view_all_customer"),
     path('customer/update/<int:pk>/', update_customer, name="update_customer"),
     path('customer/delete/<int:pk>/', delete_customer, name="delete_customer"),
+
+
+    # Dropdown Routing
+    path('products/dropdown/', select_product_dropdown, name="Products Dropdown"),
 
 
 
