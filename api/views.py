@@ -334,8 +334,7 @@ def view_all_production(request, pk):
         for i in filter_records:
             products = get_object_or_404(Products, pk=i.products_id)
             employee = get_object_or_404(Employee, pk=i.employee_id)
-            # data.append({'id': i.id, 'products':f"{products.name}({i.products_id})", "employee":f"{employee.name}({i.employee_id})", "quantity":i.quantity, 'rate': i.rate})
-            data.append({'id': i.id, 'products':{'id': i.products_id, 'name':products.name}, "employee":{'id':i.employee_id, 'name':employee.name}, "quantity":i.quantity, 'rate': i.rate})
+            data.append({'id': i.id, 'products':{'id': i.products_id, 'name':products.name, 'rate':products.rate}, "employee":{'id':i.employee_id, 'name':employee.name}, "quantity":i.quantity, 'rate': i.rate})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
