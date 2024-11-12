@@ -41,8 +41,6 @@ def add_employees(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
-
 # =======================
 # ===== View Employees
 # =======================
@@ -64,8 +62,6 @@ def view_employees(request, pk):
         serializer = EmployeeSerializer(filter_records, many=True)
         return JsonResponse([{"total_page": number_of_pages}] + serializer.data, safe=False)
 
-
-
 # =======================
 # ===== Update Employees
 # =======================
@@ -77,7 +73,6 @@ def update_employee(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP)
-
 
 # =======================
 # ===== Delete Employees
@@ -115,8 +110,6 @@ def add_customer(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
-
 # =======================
 # ===== View Customer
 # =======================
@@ -138,8 +131,6 @@ def view_all_customer(request, pk):
         serializer = CustomerSerializer(filter_records, many=True)
         return JsonResponse([{"total_page": number_of_pages}] + serializer.data, safe=False)
 
-
-
 # =======================
 # ===== Update Customer
 # =======================
@@ -151,8 +142,6 @@ def update_customer(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 # =======================
 # ===== Delete Customer
@@ -185,8 +174,6 @@ def add_catagory(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
-
 # ======================
 # ===== View Catagory
 # ======================
@@ -194,8 +181,6 @@ def view_catagory(request):
     catagory = Catagory.objects.all()
     serializer = CatagorySerializer(catagory, many=True)
     return JsonResponse(serializer.data, safe=False)
-
-
 
 # =======================
 # ===== Delete Catagory
@@ -231,8 +216,6 @@ def add_products(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
-
 # =======================
 # ===== View Products
 # =======================
@@ -258,8 +241,6 @@ def view_all_products(request, pk):
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
-
-
 # =======================
 # ===== Update Products
 # =======================
@@ -271,8 +252,6 @@ def update_products(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 
 # =======================
 # ===== Delete Products
@@ -309,9 +288,6 @@ def add_production(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-
-
-
 # =======================
 # ===== View Production
 # =======================
@@ -338,8 +314,6 @@ def view_all_production(request, pk):
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
-
-
 # ========================
 # ===== Update Production
 # ========================
@@ -351,6 +325,76 @@ def update_production(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# =======================
+# ===== Delete Production
+# =======================
+def delete_production(request, pk):
+    production = get_object_or_404(Production, pk=pk)
+    production.delete()
+    return JsonResponse({'message': 'Removed Productions from database.'}, status=201)
+
+
+
+
+# ====================== Inventory Section =====================
+# =======================
+# ===== Add to Inventory
+# =======================
+@csrf_exempt
+def add_inventory(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+
+        production_id = data.get('production_id')
+        current_status = data.get('current_status')
+
+        production = get_object_or_404(Production, pk=production_id)
+
+        inventory = Inventory.objects.create(employee_id=production.employee_id, products_id=production.products_id, production_id=production_id, current_status=current_status)
+        inventory.save()
+        
+        return JsonResponse({'message': 'Production added to Inventory'}, status=201)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+# =======================
+# ===== View Inventory
+# =======================
+def view_inventory(request, pk):
+    data = []
+    if pk > 0:
+        query = Inventory.objects.all()
+        limit = 10
+        offset = (pk - 1) * limit
+        number_of_pages = len(query)/limit
+        if offset + limit > len(query):
+            to_value = offset + (len(query) - offset)
+        else:
+            to_value = offset + limit
+
+        filter_records = query[offset:to_value]
+        if isinstance(number_of_pages, float):
+            number_of_pages = int(number_of_pages) + 1
+        
+
+        # veriables
+        sl_no = offset
+        for i in filter_records:
+            products = get_object_or_404(Products, pk=i.products_id)
+            employee = get_object_or_404(Employee, pk=i.employee_id)
+            production = get_object_or_404(Production, pk=i.production_id)
+            
+            data.append({'SL.NO.': sl_no, 'Products':{'ID':products.id, 'Name':products.name}, 'Employee':{'ID':employee.id, 'Name':employee.name}, 'Production ID':production.id, 'Quantity':production.quantity, 'Current Status':i.current_status, "Date":i.created_at})
+            sl_no += 1
+
+        return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
+
+
 
 
 

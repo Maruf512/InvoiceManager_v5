@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, select_product_dropdown, update_production
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, select_product_dropdown, update_production, delete_production, add_inventory, view_inventory
 
 urlpatterns = [
     # Catagory Routing
@@ -27,7 +27,15 @@ urlpatterns = [
     path('production/create/', add_production, name="add_production"),
     path('production/view/<int:pk>/', view_all_production, name="view_all_production"),
     path('production/update/<int:pk>/', update_production, name="Update Production"),
+    path('production/delete/<int:pk>/', delete_production, name="delete_products"),
     
+
+    # Inventory Section
+    path('inventory/add/', add_inventory, name="add production to inventory"),
+    path('inventory/view/<int:pk>/', view_inventory, name="view_inventory"),
+
+
+
     # Customer Routing
     path('customer/create/', add_customer, name="add_customer"),
     path('customer/view/<int:pk>/', view_all_customer, name="view_all_customer"),
