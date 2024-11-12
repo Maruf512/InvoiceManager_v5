@@ -2,6 +2,7 @@ from django.shortcuts import redirect, get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
+from django.db.utils import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -79,7 +80,11 @@ def update_employee(request, pk):
 # =======================
 def delete_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
-    employee.delete()
+    try:
+        employee.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't delete this Employee"}, status=201)
+        
     return JsonResponse({'message': 'Removed employee from database.'}, status=201)
 
 
@@ -148,7 +153,11 @@ def update_customer(request, pk):
 # =======================
 def delete_customer(request, pk):
     customer = get_object_or_404(Customer, pk=pk)
-    customer.delete()
+    try:
+        customer.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't delete this Customer"}, status=201)
+
     return JsonResponse({'message': 'Removed customer from database.'}, status=201)
 
 
@@ -187,7 +196,11 @@ def view_catagory(request):
 # =======================
 def delete_catagory(request, pk):
     catagory = get_object_or_404(Catagory, pk=pk)
-    catagory.delete()
+    try:
+        catagory.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't delete this Catagory"}, status=201)
+
     return JsonResponse({'message': 'Removed Catagory from database.'}, status=201)
 
 
@@ -258,7 +271,11 @@ def update_products(request, pk):
 # =======================
 def delete_products(request, pk):
     products = get_object_or_404(Products, pk=pk)
-    products.delete()
+    try:
+        products.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't delete this Product"}, status=201)
+    
     return JsonResponse({'message': 'Removed Products from database.'}, status=201)
 
 
@@ -331,7 +348,10 @@ def update_production(request, pk):
 # =======================
 def delete_production(request, pk):
     production = get_object_or_404(Production, pk=pk)
-    production.delete()
+    try:
+        production.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't remove it from production"}, status=201)
     return JsonResponse({'message': 'Removed Productions from database.'}, status=201)
 
 
@@ -416,7 +436,11 @@ def update_inventory(request, pk):
 # =======================
 def delete_inventory(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
-    inventory.delete()
+    try:
+        inventory.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't remove it from inventory"}, status=201)
+
     return JsonResponse({'message': 'Removed Inventory from database.'}, status=201)
 
 
