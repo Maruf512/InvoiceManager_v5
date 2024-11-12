@@ -320,10 +320,7 @@ def view_all_production(request, pk):
 @api_view(['PUT'])
 def update_production(request, pk):
     production = get_object_or_404(Production, pk=pk)
-    
-    print(request.data)
     serializer = ProductionSerializer(production, data=request.data)
-
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -402,6 +399,25 @@ def view_inventory(request, pk):
     # Return JSON response with pagination and data
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
+# ========================
+# ===== Update Inventory
+# ========================
+@api_view(['PUT'])
+def update_inventory(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    serializer = InventorySerializer(inventory, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# =======================
+# ===== Delete Inventory
+# =======================
+def delete_inventory(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    inventory.delete()
+    return JsonResponse({'message': 'Removed Inventory from database.'}, status=201)
 
 
 
