@@ -320,7 +320,10 @@ def view_all_production(request, pk):
 @api_view(['PUT'])
 def update_production(request, pk):
     production = get_object_or_404(Production, pk=pk)
+    
+    print(request.data)
     serializer = ProductionSerializer(production, data=request.data)
+
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
