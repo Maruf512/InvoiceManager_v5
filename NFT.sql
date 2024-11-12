@@ -72,6 +72,7 @@ SELECT * FROM production WHERE employee_id=1
 
 
 CREATE TABLE inventory(
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     employee_id BIGINT UNSIGNED NOT NULL,
     products_id BIGINT UNSIGNED NOT NULL,
     production_id BIGINT UNSIGNED NOT NULL,
@@ -80,8 +81,7 @@ CREATE TABLE inventory(
     Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     Foreign Key (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (employee_id, production_id)
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
 INSERT INTO inventory(employee_id, products_id, production_id, current_status) VALUES(1, 1, 2, 'SOLD')
@@ -92,6 +92,7 @@ SELECT * FROM inventory
 
 
 CREATE TABLE employee_bill(
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     employee_id BIGINT UNSIGNED NOT NULL,
     production_id BIGINT UNSIGNED NOT NULL,
     total_amount INT NOT NULL,
@@ -99,8 +100,7 @@ CREATE TABLE employee_bill(
     Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     Foreign Key (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (employee_id, production_id)
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
 INSERT INTO employee_bill(employee_id, production_id, total_amount) VALUES (1,1,4620)
@@ -127,7 +127,7 @@ SELECT * FROM customer
 
 -- SELECT * FROM inventory WHERE current_status='IN-STOCK' AND employee_id=1 (run this command for one employee)
 CREATE TABLE challan(
-    id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT UNSIGNED NOT NULL,
     products_id BIGINT UNSIGNED NOT NULL,
     employee_id BIGINT UNSIGNED NOT NULL,
@@ -138,8 +138,7 @@ CREATE TABLE challan(
     Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     Foreign Key (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id, employee_id, production_id)
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
 INSERT INTO challan(id, customer_id, products_id, employee_id, production_id) VALUES(1, 1, 1, 1, 2)
@@ -147,7 +146,7 @@ INSERT INTO challan(id, customer_id, products_id, employee_id, production_id) VA
 SELECT * FROM challan
 
 CREATE TABLE cash_memo(
-    id BIGINT UNSIGNED NOT NULL,
+    id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     products_id BIGINT UNSIGNED NOT NULL,
     customer_id BIGINT UNSIGNED NOT NULL,
     challan_id BIGINT UNSIGNED NOT NULL,
@@ -158,7 +157,6 @@ CREATE TABLE cash_memo(
     Foreign Key (`challan_id`) REFERENCES challan (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(id, products_id, customer_id, challan_id)
 )
 
 

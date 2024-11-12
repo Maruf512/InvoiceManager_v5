@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import Catagory, Products, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
 from .serializer import *
 import json
-
+from math import ceil
 
 
 # ====================== Employee Section =====================
@@ -353,7 +353,6 @@ def add_inventory(request):
         current_status = data.get('current_status')
 
         production = get_object_or_404(Production, pk=production_id)
-
         inventory = Inventory.objects.create(employee_id=production.employee_id, products_id=production.products_id, production_id=production_id, current_status=current_status)
         inventory.save()
         
@@ -367,32 +366,38 @@ def add_inventory(request):
 # =======================
 def view_inventory(request, pk):
     data = []
-    if pk > 0:
-        query = Inventory.objects.all()
-        limit = 10
-        offset = (pk - 1) * limit
-        number_of_pages = len(query)/limit
-        if offset + limit > len(query):
-            to_value = offset + (len(query) - offset)
-        else:
-            to_value = offset + limit
+    limit = 10
+    offset = (pk - 1) * limit
 
-        filter_records = query[offset:to_value]
-        if isinstance(number_of_pages, float):
-            number_of_pages = int(number_of_pages) + 1
-        
+    # Count total records for pagination
+    total_records = Inventory.objects.count()
+    number_of_pages = ceil(total_records / limit)
 
-        # veriables
-        sl_no = offset
-        for i in filter_records:
-            products = get_object_or_404(Products, pk=i.products_id)
-            employee = get_object_or_404(Employee, pk=i.employee_id)
-            production = get_object_or_404(Production, pk=i.production_id)
-            
-            data.append({'SL.NO.': sl_no, 'Products':{'ID':products.id, 'Name':products.name}, 'Employee':{'ID':employee.id, 'Name':employee.name}, 'Production ID':production.id, 'Quantity':production.quantity, 'Current Status':i.current_status, "Date":i.created_at})
-            sl_no += 1
+    # Get the filtered records for the current page
+    inventory_items = Inventory.objects.select_related('products', 'employee', 'production').all()[offset:offset + limit]
 
-        return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
+    # Variables
+    sl_no = offset + 1  # Start numbering based on the offset
+    for item in inventory_items:
+        data.append({
+            'Inventory ID': item.id,
+            'Products': {
+                'ID': item.products.id, 
+                'Name': item.products.name
+            },
+            'Employee': {
+                'ID': item.employee.id, 
+                'Name': item.employee.name
+            },
+            'Production ID': item.production.id,
+            'Quantity': item.production.quantity,
+            'Current Status': item.current_status,
+            'Date': item.created_at
+        })
+        sl_no += 1
+
+    # Return JSON response with pagination and data
+    return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
 
 
