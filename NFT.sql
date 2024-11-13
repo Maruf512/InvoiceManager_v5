@@ -38,6 +38,7 @@ CREATE TABLE production(
     employee_id BIGINT UNSIGNED NOT NULL,
     quantity FLOAT NOT NULL,
     rate FLOAT NOT NULL,
+    payment VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
     Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

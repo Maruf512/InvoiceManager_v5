@@ -49,6 +49,7 @@ class Production(models.Model):
     employee = models.ForeignKey(Employee, models.RESTRICT)
     quantity = models.FloatField()
     rate = models.FloatField()
+    payment = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

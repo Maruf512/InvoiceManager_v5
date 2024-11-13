@@ -298,8 +298,6 @@ def add_production(request):
         quantity = data.get('quantity')
         rate = data.get('rate')
 
-        print(products_id, employee_id, quantity, rate)
-
         products = get_object_or_404(Product, pk=products_id)
         employee = get_object_or_404(Employee, pk=employee_id)
 
@@ -331,7 +329,7 @@ def view_all_production(request, pk):
             number_of_pages = int(number_of_pages) + 1
         
         for i in filter_records:
-            data.append({'id': i.id, 'products':{'id': i.product.id, 'name':i.product.name, 'rate':i.rate}, "employee":{'id':i.employee.id, 'name':i.employee.name}, "quantity":i.quantity, 'rate': i.rate})
+            data.append({'id': i.id, 'product':{'id': i.product.id, 'name':i.product.name, 'rate':i.rate}, "employee":{'id':i.employee.id, 'name':i.employee.name}, "quantity":i.quantity, 'rate': i.rate, 'payment':i.payment,'date': i.created_at.date()})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
@@ -389,6 +387,8 @@ def add_inventory(request):
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+
+
 # =======================
 # ===== View Inventory
 # =======================
@@ -408,19 +408,19 @@ def view_inventory(request, pk):
     sl_no = offset + 1  # Start numbering based on the offset
     for item in inventory_items:
         data.append({
-            'Inventory ID': item.id,
-            'Products': {
-                'ID': item.product.id, 
-                'Name': item.product.name
+            'id': item.id,
+            'product': {
+                'id': item.product.id, 
+                'name': item.product.name
             },
-            'Employee': {
-                'ID': item.employee.id, 
-                'Name': item.employee.name
+            'employee': {
+                'id': item.employee.id, 
+                'name': item.employee.name
             },
-            'Production ID': item.production.id,
-            'Quantity': item.production.quantity,
-            'Current Status': item.current_status,
-            'Date': item.created_at
+            'production': item.production.id,
+            'quantity': item.production.quantity,
+            'status': item.current_status,
+            'date': item.created_at
         })
         sl_no += 1
 
