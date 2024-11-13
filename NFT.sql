@@ -11,16 +11,6 @@ CREATE TABLE catagory(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO catagory(name) VALUES ('Shawl')
-
-INSERT INTO catagory(name) VALUES ('Shawl')
-
-SELECT * FROM catagory
-
-DELETE FROM `catagory` WHERE `id` IN (1,2)
-
-
-
 
 CREATE TABLE products(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
@@ -32,12 +22,6 @@ CREATE TABLE products(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO products(name, rate, catagory_id) VALUES ("Flor Mate", 60, 3)
-
-SELECT * FROM products
-
-
-
 CREATE TABLE employee(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -48,12 +32,6 @@ CREATE TABLE employee(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO employee(name, address, nid_no, mobile) VALUES ("Lovely", "Garashin", "88888888", "01799999999")
-
-SELECT * FROM employee
-
-
--- Production id == roll id (from nowon there willbe no name on the roll, it will only contain YDS and Product id)
 CREATE TABLE production(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
     products_id BIGINT UNSIGNED NOT NULL,
@@ -65,11 +43,6 @@ CREATE TABLE production(
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
-
-INSERT INTO production(products_id, employee_id, quantity, rate) VALUES (1, 2, 29, 30)
-
-SELECT * FROM production WHERE employee_id=1
-
 
 CREATE TABLE inventory(
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -84,13 +57,6 @@ CREATE TABLE inventory(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO inventory(employee_id, products_id, production_id, current_status) VALUES(1, 1, 2, 'SOLD')
-
-
-SELECT * FROM inventory
-
-
-
 CREATE TABLE employee_bill(
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     employee_id BIGINT UNSIGNED NOT NULL,
@@ -103,12 +69,6 @@ CREATE TABLE employee_bill(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO employee_bill(employee_id, production_id, total_amount) VALUES (1,1,4620)
-
-SELECT * FROM employee_bill WHERE employee_id=1
-
-
-
 CREATE TABLE customer(
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -120,12 +80,6 @@ CREATE TABLE customer(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO customer(name, address, mobile) VALUES('DoggyMan', 'Shokhipur', '01799999999')
-
-SELECT * FROM customer
-
-
--- SELECT * FROM inventory WHERE current_status='IN-STOCK' AND employee_id=1 (run this command for one employee)
 CREATE TABLE challan(
     id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     customer_id BIGINT UNSIGNED NOT NULL,
@@ -141,10 +95,6 @@ CREATE TABLE challan(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
 
-INSERT INTO challan(id, customer_id, products_id, employee_id, production_id) VALUES(1, 1, 1, 1, 2)
-
-SELECT * FROM challan
-
 CREATE TABLE cash_memo(
     id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
     products_id BIGINT UNSIGNED NOT NULL,
@@ -156,7 +106,6 @@ CREATE TABLE cash_memo(
     Foreign Key (`customer_id`) REFERENCES customer (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     Foreign Key (`challan_id`) REFERENCES challan (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
-
 

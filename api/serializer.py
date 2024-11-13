@@ -1,17 +1,17 @@
 from rest_framework import serializers
-from .models import Catagory, Products, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
+from .models import Category, Product, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
 
 
 class CatagorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Catagory
+        model = Category
         fields = '__all__'
 
 
 class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Products
-        fields = ['id', 'name', 'rate', 'catagory_id']
+        model = Product
+        fields = ['id', 'name', 'rate', 'category']
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class ProductionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Production
-        fields = ['id', 'products', 'employee', 'quantity', 'rate']
+        fields = ['id', 'product', 'employee', 'quantity', 'rate']
 
 
 
@@ -38,7 +38,7 @@ class EmployeeBillSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
-        fields = ['current_status']
+        fields = ['employee', 'product', 'production', 'current_status']
 
 
 

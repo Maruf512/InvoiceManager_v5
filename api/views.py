@@ -3,10 +3,9 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from django.db.utils import IntegrityError
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Catagory, Products, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
+from .models import Category, Product, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
 from .serializer import *
 import json
 from math import ceil
@@ -175,7 +174,7 @@ def add_catagory(request):
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
         name = data.get('name')
-        catagory = Catagory.objects.create(name=name)
+        catagory = Category.objects.create(name=name)
         catagory.save()
         
         return JsonResponse({'message': 'Catagory registered successfully.'}, status=201)
@@ -187,7 +186,7 @@ def add_catagory(request):
 # ===== View Catagory
 # ======================
 def view_catagory(request):
-    catagory = Catagory.objects.all()
+    catagory = Category.objects.all()
     serializer = CatagorySerializer(catagory, many=True)
     return JsonResponse(serializer.data, safe=False)
 
@@ -195,7 +194,7 @@ def view_catagory(request):
 # ===== Delete Catagory
 # =======================
 def delete_catagory(request, pk):
-    catagory = get_object_or_404(Catagory, pk=pk)
+    catagory = get_object_or_404(Category, pk=pk)
     try:
         catagory.delete()
     except IntegrityError:
@@ -219,9 +218,11 @@ def add_products(request):
 
         name = data.get('name')
         rate = data.get('rate')
-        catagory_id = data.get('catagory_id')
+        catagory_id = data.get('category')
 
-        products = Products.objects.create(name=name, rate=rate, catagory_id=catagory_id)
+        category = get_object_or_404(Category, pk=catagory_id)
+
+        products = Product.objects.create(name=name, rate=rate, category=category)
         products.save()
         
         return JsonResponse({'message': 'Products added successfully.'}, status=201)
@@ -235,7 +236,7 @@ def add_products(request):
 def view_all_products(request, pk):
     data = []
     if pk > 0:
-        query = Products.objects.all()
+        query = Product.objects.all()
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit
@@ -249,8 +250,8 @@ def view_all_products(request, pk):
             number_of_pages = int(number_of_pages) + 1
         
         for i in filter_records:
-            catagory_name = get_object_or_404(Catagory, pk=i.catagory_id)
-            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'catagory_name':catagory_name.name})
+            catagory_name = get_object_or_404(Category, pk=i.category.id)
+            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'category':catagory_name.name})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
@@ -259,7 +260,7 @@ def view_all_products(request, pk):
 # =======================
 @api_view(['PUT'])
 def update_products(request, pk):
-    products = get_object_or_404(Products, pk=pk)
+    products = get_object_or_404(Product, pk=pk)
     serializer = ProductsSerializer(products, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -270,7 +271,7 @@ def update_products(request, pk):
 # ===== Delete Products
 # =======================
 def delete_products(request, pk):
-    products = get_object_or_404(Products, pk=pk)
+    products = get_object_or_404(Product, pk=pk)
     try:
         products.delete()
     except IntegrityError:
@@ -292,12 +293,17 @@ def add_production(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        products_id = data.get('products_id')
-        employee_id = data.get('employee_id')
+        products_id = data.get('product')
+        employee_id = data.get('employee')
         quantity = data.get('quantity')
         rate = data.get('rate')
 
-        production = Production.objects.create(products_id=products_id, employee_id=employee_id, quantity=quantity, rate=rate)
+        print(products_id, employee_id, quantity, rate)
+
+        products = get_object_or_404(Product, pk=products_id)
+        employee = get_object_or_404(Employee, pk=employee_id)
+
+        production = Production.objects.create(product=products, employee=employee, quantity=quantity, rate=rate)
         production.save()
         
         return JsonResponse({'message': 'Production added successfully.'}, status=201)
@@ -325,9 +331,7 @@ def view_all_production(request, pk):
             number_of_pages = int(number_of_pages) + 1
         
         for i in filter_records:
-            products = get_object_or_404(Products, pk=i.products_id)
-            employee = get_object_or_404(Employee, pk=i.employee_id)
-            data.append({'id': i.id, 'products':{'id': i.products_id, 'name':products.name, 'rate':products.rate}, "employee":{'id':i.employee_id, 'name':employee.name}, "quantity":i.quantity, 'rate': i.rate})
+            data.append({'id': i.id, 'products':{'id': i.product.id, 'name':i.product.name, 'rate':i.rate}, "employee":{'id':i.employee.id, 'name':i.employee.name}, "quantity":i.quantity, 'rate': i.rate})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
@@ -369,11 +373,15 @@ def add_inventory(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        production_id = data.get('production_id')
+        production = data.get('production')
         current_status = data.get('current_status')
 
-        production = get_object_or_404(Production, pk=production_id)
-        inventory = Inventory.objects.create(employee_id=production.employee_id, products_id=production.products_id, production_id=production_id, current_status=current_status)
+        production = get_object_or_404(Production, pk=production)
+        employee = get_object_or_404(Employee, pk=production.employee_id)
+        product = get_object_or_404(Product, pk=production.product.id)
+
+
+        inventory = Inventory.objects.create(employee=employee, product=product, production=production, current_status=current_status)
         inventory.save()
         
         return JsonResponse({'message': 'Production added to Inventory'}, status=201)
@@ -394,7 +402,7 @@ def view_inventory(request, pk):
     number_of_pages = ceil(total_records / limit)
 
     # Get the filtered records for the current page
-    inventory_items = Inventory.objects.select_related('products', 'employee', 'production').all()[offset:offset + limit]
+    inventory_items = Inventory.objects.select_related('product', 'employee', 'production').all()[offset:offset + limit]
 
     # Variables
     sl_no = offset + 1  # Start numbering based on the offset
@@ -402,8 +410,8 @@ def view_inventory(request, pk):
         data.append({
             'Inventory ID': item.id,
             'Products': {
-                'ID': item.products.id, 
-                'Name': item.products.name
+                'ID': item.product.id, 
+                'Name': item.product.name
             },
             'Employee': {
                 'ID': item.employee.id, 
@@ -452,7 +460,7 @@ def delete_inventory(request, pk):
 # =============================
 def select_product_dropdown(request):
     data = []
-    queary = Products.objects.all()
+    queary = Product.objects.all()
 
     for i in queary:
         data.append({'id':i.id, 'name': i.name, 'rate': i.rate})
