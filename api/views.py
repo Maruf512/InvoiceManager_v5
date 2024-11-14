@@ -297,12 +297,17 @@ def add_production(request):
         employee_id = data.get('employee')
         quantity = data.get('quantity')
         rate = data.get('rate')
+        current_status = "IN-STOCK"
 
-        products = get_object_or_404(Product, pk=products_id)
+        product = get_object_or_404(Product, pk=products_id)
         employee = get_object_or_404(Employee, pk=employee_id)
 
-        production = Production.objects.create(product=products, employee=employee, quantity=quantity, rate=rate)
+        production = Production.objects.create(product=product, employee=employee, quantity=quantity, rate=rate)
         production.save()
+
+        # add data in inventory
+        inventory = Inventory.objects.create(employee=employee, product=product, production=production, current_status=current_status)
+        inventory.save()
         
         return JsonResponse({'message': 'Production added successfully.'}, status=201)
 
