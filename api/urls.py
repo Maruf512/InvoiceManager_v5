@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan, view_challan, challan
 
 urlpatterns = [
     # Catagory Routing
@@ -48,14 +48,11 @@ urlpatterns = [
 
 
     # Challan Section
+    path('challan/<int:pk>/', challan, name="View Single Challan"),
     path('challan/create/', add_challan, name="add_challan"),
-
-
-
-
-
+    path('challan/view/<int:pk>/', view_challan, name="View Challan"),
     # Filter
-    # get data from inventory by employee
+    # get data from inventory for challan
     path('inventory/filter/', filter_inventory, name="Get Inventory by Employee"),
 
 

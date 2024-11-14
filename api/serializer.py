@@ -38,7 +38,7 @@ class EmployeeBillSerializer(serializers.ModelSerializer):
 class InventorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Inventory
-        fields = ['employee', 'product', 'production', 'current_status']
+        fields = ['current_status']
 
 
 

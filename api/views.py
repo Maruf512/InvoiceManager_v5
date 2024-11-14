@@ -5,7 +5,7 @@ from django.http import JsonResponse, Http404
 from django.db.utils import IntegrityError
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Category, Product, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
+from .models import Category, Product, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo, ChallanProduction
 from .serializer import *
 import json
 from math import ceil
@@ -407,7 +407,7 @@ def view_inventory(request, pk):
     number_of_pages = ceil(total_records / limit)
 
     # Get the filtered records for the current page
-    inventory_items = Inventory.objects.select_related('product', 'employee', 'production').all()[offset:offset + limit]
+    inventory_items = Inventory.objects.all()[offset:offset + limit]
 
     # Variables
     sl_no = offset + 1  # Start numbering based on the offset
@@ -425,7 +425,7 @@ def view_inventory(request, pk):
             'production': item.production.id,
             'quantity': item.production.quantity,
             'status': item.current_status,
-            'date': item.created_at
+            'date': item.created_at.date()
         })
         sl_no += 1
 
@@ -540,6 +540,10 @@ def filter_inventory(request):
 
 
 
+# ===================================== Create Challan Section =====================================
+# =======================
+# ===== Create Challan
+# =======================
 @csrf_exempt
 def add_challan(request):
     if request.method == 'POST':
@@ -547,14 +551,121 @@ def add_challan(request):
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+        
+        inventory_id = data.get('inventory_id')
+        customer = get_object_or_404(Customer, pk=data.get("customer_id"))
+        total = 0
+        current_status = "NOT-PAID"
+
+        for item in inventory_id:
+            inventory = get_object_or_404(Inventory, pk=item)
+            total += inventory.production.quantity
+
+        challan = Challan.objects.create(customer=customer, total=total, current_status=current_status)
+        challan.save()
+
+        for item in inventory_id:
+            inventory = get_object_or_404(Inventory, pk=item)
+            inventory.current_status = "OUT-OF-STOCK"
+            inventory.save()
+            challan_production = ChallanProduction.objects.create(challan=challan, employee=inventory.employee, product=inventory.product, production=inventory.production )
+            challan_production.save()
 
 
-        return JsonResponse({"message": "Valid Request", "data":data}, safe=False, status=201)
+        return JsonResponse({"message": "Data saved successfully"}, safe=False, status=201)
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+    
+
+# =======================
+# ===== View Challan
+# =======================
+def view_challan(request, pk):
+    data = []
+    limit = 10
+    offset = (pk - 1) * limit
+
+    total_records = Challan.objects.count()
+    number_of_pages = ceil(total_records / limit)
+
+    challan_items = Challan.objects.all()[offset:offset + limit]
+
+    sl_no = offset + 1 
+    for item in challan_items:
+        production = []
+        challan_production = ChallanProduction.objects.filter(challan = item.id)
+        
+        for i in challan_production:
+            production.append(i.production.id)
+
+        data.append({'id':item.id, 'production': production, 'quantity': item.total, 'current_status': item.current_status, 'date': item.created_at.date()})
+        sl_no += 1
+
+    # Return JSON response with pagination and data
+    return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
 
+# =======================
+# ===== View Challan
+# =======================
+def challan(request, pk):
+    challan = get_object_or_404(Challan, pk=pk)
+
+    challan_production_products = []
+    challan_production_employee = []
+    data = []
+    
+    challan_production = ChallanProduction.objects.filter(challan = challan.id)
+    for item in challan_production:
+        if item.product.id not in challan_production_products:
+            challan_production_products.append(item.product.id)
+        
+        if item.production.employee.id not in challan_production_employee:
+            challan_production_employee.append(item.production.employee.id)
+
+
+    for employee in challan_production_employee:
+        for product in challan_production_products:
+            challan_production_filter = ChallanProduction.objects.filter(
+                challan = challan.id,
+                employee = employee,
+                product = product
+            )
+
+            data.append({'colum': challan_production_filter})
+
+    # gather all the data
+    total_column = []
+    customer_name = challan.customer.name
+    customer_address = challan.customer.address
+    customer_company = challan.customer.company_name
+    date = challan.created_at.date()
+    challan_no = challan.id
+
+    for item in data:
+        production_qty = ""
+        total = 0
+        for i in item['colum']:
+            production_qty += f"{i.production.quantity}+"
+            total += i.production.quantity
+
+        total_column.append({'employee': item['colum'][0].employee.name, 'product':item['colum'][0].product.name, 'quantity':production_qty[:-1], 'total': total})
+
+
+    invoice_data = {
+        'customer_name': customer_name,
+        'customer_company': customer_company,
+        'customer_address': customer_address,
+        'challan_no': challan_no,
+        'date': f"{date}",
+        'grand_total': challan.total,
+        'total_column': total_column
+    }
+
+    print(invoice_data)
+
+    return JsonResponse(invoice_data, safe=False, status=201)
 
 
 
