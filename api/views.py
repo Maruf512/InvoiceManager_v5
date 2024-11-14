@@ -540,3 +540,24 @@ def filter_inventory(request):
 
 
 
+@csrf_exempt
+def add_challan(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+
+
+        return JsonResponse({"message": "Valid Request", "data":data}, safe=False, status=201)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+
+
+
+
+
+
+

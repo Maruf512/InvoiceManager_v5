@@ -104,9 +104,7 @@ class Customer(models.Model):
 class Challan(models.Model):
     id = models.BigAutoField(primary_key=True)
     customer = models.ForeignKey(Customer, models.RESTRICT)
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    employee = models.ForeignKey(Employee, models.RESTRICT)
-    production = models.ForeignKey(Production, models.RESTRICT)
+    total = models.CharField(max_length=100)
     current_status = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -114,6 +112,21 @@ class Challan(models.Model):
     class Meta:
         managed = False
         db_table = 'challan'
+
+
+# Junction table to connect Production to Challan
+class ChallanProduction(models.Model):
+    challan = models.ForeignKey(Challan, on_delete=models.RESTRICT)
+    employee = models.ForeignKey(Employee, models.RESTRICT, db_column='employee_id')
+    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
+    production = models.ForeignKey(Production, on_delete=models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'challan_production'  # Specify the table name explicitly
+        managed = False  # Disable Django's management of this table
+
 
 
 class CashMemo(models.Model):

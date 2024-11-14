@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan
 
 urlpatterns = [
     # Catagory Routing
@@ -43,6 +43,15 @@ urlpatterns = [
     path('customer/view/<int:pk>/', view_all_customer, name="view_all_customer"),
     path('customer/update/<int:pk>/', update_customer, name="update_customer"),
     path('customer/delete/<int:pk>/', delete_customer, name="delete_customer"),
+
+
+
+
+    # Challan Section
+    path('challan/create/', add_challan, name="add_challan"),
+
+
+
 
 
     # Filter
