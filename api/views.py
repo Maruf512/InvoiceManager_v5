@@ -1,7 +1,7 @@
 from django.shortcuts import redirect, get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db.utils import IntegrityError
 from rest_framework.response import Response
 from rest_framework import status
@@ -459,20 +459,84 @@ def delete_inventory(request, pk):
 
 
 
-# ====================== Dropdoen Section =====================
-# =============================
-# ===== Select Procuct Dropdown
-# =============================
-def select_product_dropdown(request):
-    data = []
-    queary = Product.objects.all()
+# ===================================== Filter Inventory Section =====================================
+@csrf_exempt
+def filter_inventory(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-    for i in queary:
-        data.append({'id':i.id, 'name': i.name, 'rate': i.rate})
 
-    print(data)
-    
-    return JsonResponse(data=data, safe=False)
+        product = data.get('product')
+        employee = data.get('employee')
+
+
+        if product != '' and employee == '':
+            try:
+                product_instinct = get_object_or_404(Product, pk=product)
+            except Http404:
+                return JsonResponse({"error": "No product matches the given query"}, status=404)
+            
+            inventory_records = Inventory.objects.filter(
+                product = product_instinct,
+                current_status = 'IN-STOCK'
+            )
+        
+        elif employee != '' and product == '':
+            try:
+                employee_instinct = get_object_or_404(Employee, pk=employee)
+            except Http404:
+                 return JsonResponse({"error": "No product matches the given query"}, status=404)
+            
+            inventory_records = Inventory.objects.filter(
+                employee = employee_instinct,
+                current_status = 'IN-STOCK'
+            )
+
+        elif employee != '' and product != '':
+            try:
+                employee_instinct = get_object_or_404(Employee, pk=employee)
+                product_instinct = get_object_or_404(Product, pk=product)
+            except Http404:
+                 return JsonResponse({"error": "No product matches the given query"}, status=404)
+            
+            inventory_records = Inventory.objects.filter(
+                employee = employee_instinct,
+                product = product_instinct,
+                current_status = 'IN-STOCK'
+            )
+
+        else:
+            inventory_records = Inventory.objects.filter(
+                current_status = 'IN-STOCK'
+            )
+
+
+        data = []
+
+        for i in inventory_records:
+            data.append({
+                'id': i.id,
+                'employee':{
+                    'id':i.employee.id,
+                    'name':i.employee.name
+                },
+                'product':{
+                    'id':i.product.id,
+                    'name': i.product.name
+                },
+                'production':{
+                    'id':i.production.id,
+                    'quantity':i.production.quantity
+                }
+            })
+
+        return JsonResponse(data, safe=False, status=201)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, select_product_dropdown, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory
 
 urlpatterns = [
     # Catagory Routing
@@ -45,8 +45,14 @@ urlpatterns = [
     path('customer/delete/<int:pk>/', delete_customer, name="delete_customer"),
 
 
-    # Dropdown Routing
-    path('products/dropdown/', select_product_dropdown, name="Products Dropdown"),
+    # Filter
+    # get data from inventory by employee
+    path('inventory/filter/', filter_inventory, name="Get Inventory by Employee"),
+
+
+
+
+
 
 ]
 
