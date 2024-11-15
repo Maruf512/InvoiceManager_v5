@@ -572,7 +572,7 @@ def add_challan(request):
             challan_production.save()
 
 
-        return JsonResponse({"message": "Data saved successfully"}, safe=False, status=201)
+        return JsonResponse({"message": "Data saved successfully", "challan_id": challan.id}, safe=False, status=201)
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
@@ -593,13 +593,25 @@ def view_challan(request, pk):
 
     sl_no = offset + 1 
     for item in challan_items:
-        production = []
+        products = []
+        quantity = ""
         challan_production = ChallanProduction.objects.filter(challan = item.id)
         
         for i in challan_production:
-            production.append(i.production.id)
+            quantity += f"{i.production.quantity} ,"
+            if i.production.product.name not in products:
+                products.append(i.production.product.name)
 
-        data.append({'id':item.id, 'production': production, 'quantity': item.total, 'current_status': item.current_status, 'date': item.created_at.date()})
+
+        # process data
+        products_name = ""
+        for product in products:
+            products_name += f"{product}, "
+
+        products_name = products_name[:-2]
+        quantity = quantity[:-2]
+
+        data.append({'id':item.id, 'products': products_name, "quantity":quantity,'total': item.total, 'current_status': item.current_status, 'date': item.created_at.date()})
         sl_no += 1
 
     # Return JSON response with pagination and data
@@ -607,7 +619,7 @@ def view_challan(request, pk):
 
 
 # =======================
-# ===== View Challan
+# ===== View Single Challan
 # =======================
 def challan(request, pk):
     challan = get_object_or_404(Challan, pk=pk)

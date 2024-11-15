@@ -86,6 +86,20 @@ class EmployeeBill(models.Model):
         db_table = 'employee_bill'
 
 
+class employee_bill_production(models.Model):
+    employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.RESTRICT)
+    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
+    production = models.ForeignKey(Production, on_delete=models.RESTRICT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'employee_bill_production'  # Specify the table name explicitly
+        managed = False  # Disable Django's management of this table
+
+
+
+
 class Customer(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
