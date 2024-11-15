@@ -642,6 +642,8 @@ def challan(request, pk):
     customer_company = challan.customer.company_name
     date = challan.created_at.date()
     challan_no = challan.id
+    grand_total = 0
+    
 
     for item in data:
         production_qty = ""
@@ -649,8 +651,16 @@ def challan(request, pk):
         for i in item['colum']:
             production_qty += f"{i.production.quantity}+"
             total += i.production.quantity
+            grand_total += i.production.quantity
 
         total_column.append({'employee': item['colum'][0].employee.name, 'product':item['colum'][0].product.name, 'quantity':production_qty[:-1], 'total': total})
+
+
+    # update challan grand total
+    if challan.total != grand_total:
+        challan.total = grand_total
+        challan.save()
+
 
 
     invoice_data = {
