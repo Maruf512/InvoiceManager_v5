@@ -5,6 +5,7 @@ from .fractions.customer_section import AddCustomer, ViewCustomer, UpdateCustome
 from .fractions.products_section import AddProducts, ViewProducts, UpdateProducts, DeleteProducts
 from .fractions.catagory_section import AddCatagory, ViewCatagory, DeleteCatagory
 from .fractions.challan_section import AddChallan, ViewChallan, ViewAllChallan
+from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
@@ -167,4 +168,7 @@ def challan(request, pk):
 
 
 # ===================================== Employee Bill Section =====================================
-
+@csrf_exempt
+def employee_bill_filter(request):
+    data = EmployeeBillFilter(request=request)
+    return data

@@ -58,7 +58,12 @@ def ViewAllChallan(request, pk):
         challan_production = ChallanProduction.objects.filter(challan = item.id)
         
         for i in challan_production:
-            quantity += f"{i.production.quantity} ,"
+            if i.production.quantity % 1 == 0:
+                quantity += f"{int(i.production.quantity)} + "
+            else:
+                quantity += f"{i.production.quantity} + "
+            
+
             if i.production.product.name not in products:
                 products.append(i.production.product.name)
 
@@ -68,9 +73,10 @@ def ViewAllChallan(request, pk):
             products_name += f"{product}, "
 
         products_name = products_name[:-2]
-        quantity = quantity[:-2]
+        quantity = quantity[:-3]
+        
 
-        data.append({'id':item.id, 'products': products_name, "quantity":quantity,'total': item.total, 'current_status': item.current_status, 'date': item.created_at.date()})
+        data.append({'id':item.id, 'products': products_name, "quantity":quantity,'total': f"{item.total} yds", 'current_status': item.current_status, 'date': item.created_at.date()})
         sl_no += 1
 
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
