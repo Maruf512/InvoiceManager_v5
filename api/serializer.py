@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from .models import Category, Product, Employee, Production, Inventory, EmployeeBill, Customer, Challan, CashMemo
+from rest_framework import serializers
 
 
 class CatagorySerializer(serializers.ModelSerializer):
@@ -60,8 +60,3 @@ class CashMemoSerializer(serializers.ModelSerializer):
     class Meta:
         model = CashMemo
         fields = '__all__'
-
-
-
-
-
