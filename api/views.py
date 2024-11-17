@@ -159,7 +159,7 @@ def add_challan(request):
 
 def view_challan(request, pk):
     data = ViewAllChallan(request=request, pk=pk)
-
+    return data
 
 def challan(request, pk):
     data = ViewChallan(request=request, pk=pk)
