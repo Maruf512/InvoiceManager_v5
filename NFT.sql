@@ -85,10 +85,6 @@ CREATE TABLE employee_bill_production (
 )
 
 
-
-
-
-
 CREATE TABLE customer(
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
     name VARCHAR(100) NOT NULL,

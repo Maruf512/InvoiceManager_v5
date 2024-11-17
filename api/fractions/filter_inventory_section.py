@@ -4,7 +4,6 @@ from ..models import Product, Employee, Inventory
 import json
 
 
-
 def FilterInventory(request):
     if request.method == 'POST':
         try:
@@ -69,8 +68,7 @@ def FilterInventory(request):
                 }
             })
 
-        return JsonResponse(data, safe=False, status=201)
+        return JsonResponse(data, safe=False, status=200)
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
-    
