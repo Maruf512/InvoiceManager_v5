@@ -37,7 +37,7 @@ def AddCustomer(request):
 # =======================
 def ViewCustomer(request, pk):
     if pk > 0:
-        query = Customer.objects.all()
+        query = Customer.objects.all().order_by('-created_at')
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit

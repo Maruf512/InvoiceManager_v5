@@ -48,7 +48,8 @@ def ViewInventory(request, pk):
     number_of_pages = ceil(total_records / limit)
 
     # Get the filtered records for the current page
-    inventory_items = Inventory.objects.all()[offset:offset + limit]
+    inventory_items = Inventory.objects.all().order_by('-created_at')
+    inventory_items = inventory_items[offset:offset + limit]
 
     # Variables
     sl_no = offset + 1
@@ -66,7 +67,7 @@ def ViewInventory(request, pk):
             'production': item.production.id,
             'quantity': item.production.quantity,
             'status': item.current_status,
-            'date': item.created_at.date()
+            'date': item.created_at.date().strftime("%d %b %y")
         })
         sl_no += 1
 

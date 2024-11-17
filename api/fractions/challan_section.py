@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from ..models import Inventory, Customer, Challan, ChallanProduction
 import json
 from math import ceil
+from collections import defaultdict
 
 
 # =======================
@@ -47,36 +48,39 @@ def ViewAllChallan(request, pk):
     limit = 10
     offset = (pk - 1) * limit
 
+    # Order by created_at in descending order to fetch the latest first
     total_records = Challan.objects.count()
     number_of_pages = ceil(total_records / limit)
-    challan_items = Challan.objects.all()[offset:offset + limit]
+    challan_items = Challan.objects.all().order_by('-created_at')[offset:offset + limit]
 
     sl_no = offset + 1 
     for item in challan_items:
         products = []
         quantity = ""
-        challan_production = ChallanProduction.objects.filter(challan = item.id)
+        challan_production = ChallanProduction.objects.filter(challan=item.id)
         
         for i in challan_production:
             if i.production.quantity % 1 == 0:
                 quantity += f"{int(i.production.quantity)} + "
             else:
                 quantity += f"{i.production.quantity} + "
-            
 
             if i.production.product.name not in products:
                 products.append(i.production.product.name)
 
-        # process data
-        products_name = ""
-        for product in products:
-            products_name += f"{product}, "
+        # Process data
+        products_name = ", ".join(products)  # Use join to concatenate product names
+        quantity = quantity[:-3]  # Remove trailing ' + '
 
-        products_name = products_name[:-2]
-        quantity = quantity[:-3]
-        
-
-        data.append({'id':item.id, 'products': products_name, "quantity":quantity,'total': f"{item.total} yds", 'current_status': item.current_status, 'date': item.created_at.date()})
+        # Add item data to the response
+        data.append({
+            'id': item.id,
+            'products': products_name,
+            'quantity': quantity,
+            'total': f"{item.total} yds",
+            'current_status': item.current_status,
+            'date': item.created_at.strftime("%d %b %y")  # Format date as "13 Nov 2024"
+        })
         sl_no += 1
 
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
@@ -86,66 +90,58 @@ def ViewAllChallan(request, pk):
 # ===== View Single Challan
 # =======================
 def ViewChallan(request, pk):
+    # Fetch the Challan object or return 404 if not found
     challan = get_object_or_404(Challan, pk=pk)
-    # Veriables
-    challan_production_products = []
-    challan_production_employee = []
-    data = []
     
-    challan_production = ChallanProduction.objects.filter(challan = challan.id)
+    # Retrieve ChallanProduction entries associated with the Challan
+    challan_production = ChallanProduction.objects.filter(challan=challan)
+
+    # Use defaultdict to group data by employee and product
+    production_data = defaultdict(lambda: defaultdict(list))
+    
+    # Group ChallanProduction data by employee and product
     for item in challan_production:
-        if item.product.id not in challan_production_products:
-            challan_production_products.append(item.product.id)
-        
-        if item.production.employee.id not in challan_production_employee:
-            challan_production_employee.append(item.production.employee.id)
+        production_data[item.production.employee.id][item.product.id].append(item)
 
-    for employee in challan_production_employee:
-        for product in challan_production_products:
-            challan_production_filter = ChallanProduction.objects.filter(
-                challan = challan.id,
-                employee = employee,
-                product = product
-            )
-
-            data.append({'colum': challan_production_filter})
-
-    # gather all the data
+    # Prepare the columns data for the invoice
     total_column = []
-    customer_name = challan.customer.name
-    customer_address = challan.customer.address
-    customer_company = challan.customer.company_name
-    date = challan.created_at.date()
-    challan_no = challan.id
     grand_total = 0
-    
-    for item in data:
-        production_qty = ""
-        total = 0
-        for i in item['colum']:
-            if i.production.quantity % 1 == 0:
-                production_qty += f"{int(i.production.quantity)}+"
-            else:
-                production_qty += f"{i.production.quantity}+"
 
-            total += i.production.quantity
-            grand_total += i.production.quantity
+    # Iterate over grouped data
+    for employee_id, products in production_data.items():
+        for product_id, items in products.items():
+            # Calculate total and quantities
+            production_qty = ''
+            total = 0
+            for item in items:
+                qty = int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity
+                production_qty += f"{qty}+"
+                total += qty
+                grand_total += qty
 
-        total_column.append({'employee': item['colum'][0].employee.name, 'product':item['colum'][0].product.name, 'quantity':production_qty[:-1], 'total': total})
+            # Add item to the total column
+            total_column.append({
+                'employee': items[0].production.employee.name,
+                'product': items[0].product.name,
+                'quantity': production_qty[:-1],  # Remove the last "+" from the quantity
+                'total': total
+            })
 
-    # update challan grand total
+    # Update Challan's grand total if necessary
     if challan.total != grand_total:
         challan.total = grand_total
         challan.save()
 
+    # Gather the invoice data
     invoice_data = {
-        'customer_name': customer_name,
-        'customer_company': customer_company,
-        'customer_address': customer_address,
-        'challan_no': challan_no,
-        'date': f"{date}",
-        'grand_total': challan.total,
+        'customer_name': challan.customer.name,
+        'customer_company': challan.customer.company_name,
+        'customer_address': challan.customer.address,
+        'challan_no': challan.id,
+        'date': challan.created_at.strftime("%d %b %y"),
+        'grand_total': f"{challan.total} yds",
         'total_column': total_column
     }
 
+    # Return the invoice data as a JSON response
     return JsonResponse(invoice_data, safe=False, status=201)

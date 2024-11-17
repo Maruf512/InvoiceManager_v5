@@ -10,91 +10,91 @@ def EmployeeBillFilter(request):
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
-        
-        employee = data.get('employee')
-        filter_method = data.get('filter_method').lower()
 
+        employee_id = data.get('employee')
+        filter_method = data.get('filter_method', '').lower()
+
+        # Validate employee
         try:
-            employee_instincts = get_object_or_404(Employee, pk=employee)
+            employee_instance = get_object_or_404(Employee, pk=employee_id)
         except Http404:
             return JsonResponse({"error": "No Employee matches the given query"}, status=404)
 
         filtered_data = []
-        # For Production based Filter
+
+        # **Production-based Filter**
         if filter_method == "production":
             production_records = Production.objects.filter(
-                payment = "NOT-PAID",
-                employee = employee_instincts)
+                payment="NOT-PAID",
+                employee=employee_instance
+            )
 
             for item in production_records:
-                # Handel Decimal points
-                if item.rate % 1 == 0:
-                    rate = int(item.rate)
-                else:
-                    rate = item.rate
-                
-                if item.quantity % 1 == 0:
-                    quantity = int(item.quantity)
-                else:
-                    quantity = item.quantity
+                # Handle Decimal Points
+                rate = int(item.rate) if item.rate % 1 == 0 else item.rate
+                quantity = int(item.quantity) if item.quantity % 1 == 0 else item.quantity
 
-                filtered_data.clear()
                 filtered_data.append({
                     'id': item.id,
-                    'employee':{
+                    'employee': {
                         'id': item.employee.id,
-                        'name': item.employee.name },
-                    'product':{
+                        'name': item.employee.name
+                    },
+                    'product': {
                         'id': item.product.id,
                         'name': item.product.name,
-                        'catagory': item.product.category.name},
+                        'category': item.product.category.name
+                    },
                     'quantity': quantity,
                     'rate': rate,
                     'amount': quantity * rate
                 })
 
-        # For challan based Filter
-        else:
-            filtered_data.clear()
-            challan_id = data.get('challan')
+        # **Challan-based Filter**
+        elif filter_method == "challan":
+            challan_ids = data.get('challan', [])
 
-            for challan in challan_id:
-                challan_instincts = get_object_or_404(Challan, pk=challan)
+            if not isinstance(challan_ids, list):
+                return JsonResponse({'error': 'Challan must be a list.'}, status=400)
+
+            for challan_id in challan_ids:
+                try:
+                    challan_instance = get_object_or_404(Challan, pk=challan_id)
+                except Http404:
+                    return JsonResponse({'error': f'Challan with id {challan_id} not found.'}, status=404)
 
                 challan_production_records = ChallanProduction.objects.filter(
-                    challan_id = challan_instincts,
-                    employee_id = employee_instincts,
-                    production_id__payment = "NOT-PAID"
-                    )
+                    challan=challan_instance,
+                    employee=employee_instance,
+                    production__payment="NOT-PAID"
+                )
 
                 for item in challan_production_records:
-                    if item.production.quantity % 1 == 0:
-                        quantity = int(item.production.quantity)
-                    else:
-                        quantity = item.production.quantity
-                    
-                    if item.production.rate % 1 == 0:
-                        rate = int(item.production.rate)
-                    else:
-                        rate = item.production.rate
-                    
+                    quantity = int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity
+                    rate = int(item.production.rate) if item.production.rate % 1 == 0 else item.production.rate
+
                     filtered_data.append({
                         'id': item.production.id,
-                        'employee':{
+                        'employee': {
                             'id': item.employee.id,
-                            'name': item.employee.name },
-                        'product':{
-                            'id': item.product.id,
-                            'name': item.product.name,
-                            'catagory': item.product.category.name},
-                        'challan':{
+                            'name': item.employee.name
+                        },
+                        'product': {
+                            'id': item.production.product.id,
+                            'name': item.production.product.name,
+                            'category': item.production.product.category.name
+                        },
+                        'challan': {
                             'id': item.challan.id,
-                            'date': f"{item.created_at.date()}"
+                            'date': item.challan.created_at.strftime("%d %b %y")  # Fixed formatting
                         },
                         'quantity': quantity,
                         'rate': rate,
                         'amount': quantity * rate
                     })
+
+        else:
+            return JsonResponse({'error': 'Invalid filter method.'}, status=400)
 
         return JsonResponse(filtered_data, safe=False, status=200)
 

@@ -11,64 +11,48 @@ def FilterInventory(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        product = data.get('product')
-        employee = data.get('employee')
+        # Retrieve filters
+        product_id = data.get('product')
+        employee_id = data.get('employee')
 
-        if product != '' and employee == '':
+        # Base queryset
+        inventory_records = Inventory.objects.filter(current_status='IN-STOCK')
+
+        # Apply product filter if provided
+        if product_id:
             try:
-                product_instinct = get_object_or_404(Product, pk=product)
+                product_instance = get_object_or_404(Product, pk=product_id)
+                inventory_records = inventory_records.filter(product=product_instance)
             except Http404:
-                return JsonResponse({"error": "No product matches the given query"}, status=404)
-            
-            inventory_records = Inventory.objects.filter(
-                product = product_instinct,
-                current_status = 'IN-STOCK')
-        
-        elif employee != '' and product == '':
+                return JsonResponse({"error": "No product matches the given query."}, status=404)
+
+        # Apply employee filter if provided
+        if employee_id:
             try:
-                employee_instinct = get_object_or_404(Employee, pk=employee)
+                employee_instance = get_object_or_404(Employee, pk=employee_id)
+                inventory_records = inventory_records.filter(employee=employee_instance)
             except Http404:
-                 return JsonResponse({"error": "No product matches the given query"}, status=404)
-            
-            inventory_records = Inventory.objects.filter(
-                employee = employee_instinct,
-                current_status = 'IN-STOCK')
+                return JsonResponse({"error": "No employee matches the given query."}, status=404)
 
-        elif employee != '' and product != '':
-            try:
-                employee_instinct = get_object_or_404(Employee, pk=employee)
-                product_instinct = get_object_or_404(Product, pk=product)
-            except Http404:
-                 return JsonResponse({"error": "No product matches the given query"}, status=404)
-            
-            inventory_records = Inventory.objects.filter(
-                employee = employee_instinct,
-                product = product_instinct,
-                current_status = 'IN-STOCK')
-
-        else:
-            inventory_records = Inventory.objects.filter(
-                current_status = 'IN-STOCK')
-
+        # Prepare response data
         data = []
-        for i in inventory_records:
+        for record in inventory_records:
             data.append({
-                'id': i.id,
-                'employee':{
-                    'id':i.employee.id,
-                    'name':i.employee.name
+                'id': record.id,
+                'employee': {
+                    'id': record.employee.id,
+                    'name': record.employee.name
                 },
-                'product':{
-                    'id':i.product.id,
-                    'name': i.product.name
+                'product': {
+                    'id': record.product.id,
+                    'name': record.product.name
                 },
-                'production':{
-                    'id':i.production.id,
-                    'quantity':i.production.quantity
+                'production': {
+                    'id': record.production.id,
+                    'quantity': record.production.quantity
                 }
             })
 
         return JsonResponse(data, safe=False, status=200)
 
-    else:
-        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+    return JsonResponse({'error': 'Invalid request method.'}, status=405)
