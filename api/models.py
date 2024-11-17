@@ -74,9 +74,8 @@ class Inventory(models.Model):
 
 class EmployeeBill(models.Model):
     id = models.BigAutoField(primary_key=True)
-    employee = models.ForeignKey(Employee, models.RESTRICT)
-    production = models.ForeignKey(Production, models.RESTRICT)
-    total_amount = models.IntegerField()
+    employee = models.ForeignKey(Employee, models.RESTRICT, db_column='employee_id')
+    total_amount = models.FloatField()
     current_status = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -86,10 +85,13 @@ class EmployeeBill(models.Model):
         db_table = 'employee_bill'
 
 
-class employee_bill_production(models.Model):
+class EmployeeBillProduction(models.Model):
     employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.RESTRICT)
     product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    production = models.ForeignKey(Production, on_delete=models.RESTRICT)
+    production = models.ForeignKey(Production, on_delete=models.RESTRICT, db_column='production_id')
+    rate = models.FloatField()
+    quantity = models.FloatField()
+    amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

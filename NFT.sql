@@ -61,11 +61,9 @@ CREATE TABLE inventory(
 CREATE TABLE employee_bill(
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     employee_id BIGINT UNSIGNED NOT NULL,
-    production_id BIGINT UNSIGNED NOT NULL,
-    total_amount INT NOT NULL,
+    total_amount FLOAT NOT NULL,
     current_status VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
     Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    Foreign Key (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -76,6 +74,9 @@ CREATE TABLE employee_bill_production (
     employee_bill_id BIGINT UNSIGNED NOT NULL,
     products_id BIGINT UNSIGNED NOT NULL,
     production_id BIGINT UNSIGNED NOT NULL,
+    rate FLOAT NOT NULL,
+    quantity FLOAT NOT NULL,
+    amount FLOAT NOT NULL,
     FOREIGN KEY (`employee_bill_id`) REFERENCES employee_bill (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,

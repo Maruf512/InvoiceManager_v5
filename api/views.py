@@ -540,7 +540,7 @@ def filter_inventory(request):
 
 
 
-# ===================================== Create Challan Section =====================================
+# ===================================== Challan Section =====================================
 # =======================
 # ===== Create Challan
 # =======================
@@ -579,7 +579,7 @@ def add_challan(request):
     
 
 # =======================
-# ===== View Challan
+# ===== View All Challan
 # =======================
 def view_challan(request, pk):
     data = []
@@ -661,7 +661,11 @@ def challan(request, pk):
         production_qty = ""
         total = 0
         for i in item['colum']:
-            production_qty += f"{i.production.quantity}+"
+            if i.production.quantity % 1 == 0:
+                production_qty += f"{int(i.production.quantity)}+"
+            else:
+                production_qty += f"{i.production.quantity}+"
+
             total += i.production.quantity
             grand_total += i.production.quantity
 
@@ -691,6 +695,10 @@ def challan(request, pk):
 
 
 
+# ===================================== Employee Bill Section =====================================
+# =======================
+# ===== Create Bill
+# =======================
 
 
 
