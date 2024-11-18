@@ -86,7 +86,7 @@ class EmployeeBill(models.Model):
 
 
 class EmployeeBillProduction(models.Model):
-    employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.RESTRICT)
+    employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.RESTRICT, db_column='employee_bill_id')
     product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
     production = models.ForeignKey(Production, on_delete=models.RESTRICT, db_column='production_id')
     rate = models.FloatField()

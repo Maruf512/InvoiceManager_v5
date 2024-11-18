@@ -39,7 +39,7 @@ def AddProducts(request):
 def ViewProducts(request, pk):
     data = []
     if pk > 0:
-        query = Product.objects.all()
+        query = Product.objects.all().order_by('-created_at')
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit

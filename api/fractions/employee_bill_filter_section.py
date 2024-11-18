@@ -11,14 +11,22 @@ def EmployeeBillFilter(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
+        # Retrieve the employee and filter method from the data
         employee_id = data.get('employee')
         filter_method = data.get('filter_method', '').lower()
 
-        # Validate employee
+        # Validate presence of employee ID and filter method
+        if not employee_id:
+            return JsonResponse({'error': 'Employee ID is required.'}, status=400)
+
+        if filter_method not in ["production", "challan"]:
+            return JsonResponse({'error': 'Invalid filter method. Must be "production" or "challan".'}, status=400)
+
+        # Fetch employee instance or return 404 if not found
         try:
             employee_instance = get_object_or_404(Employee, pk=employee_id)
         except Http404:
-            return JsonResponse({"error": "No Employee matches the given query"}, status=404)
+            return JsonResponse({"error": "Employee not found."}, status=404)
 
         filtered_data = []
 
@@ -28,6 +36,9 @@ def EmployeeBillFilter(request):
                 payment="NOT-PAID",
                 employee=employee_instance
             )
+
+            if not production_records:
+                return JsonResponse({'message': 'No production records found for this employee.'}, status=200)
 
             for item in production_records:
                 # Handle Decimal Points
@@ -55,20 +66,30 @@ def EmployeeBillFilter(request):
             challan_ids = data.get('challan', [])
 
             if not isinstance(challan_ids, list):
-                return JsonResponse({'error': 'Challan must be a list.'}, status=400)
+                return JsonResponse({'error': 'Challan must be provided as a list.'}, status=400)
+
+            if not challan_ids:
+                return JsonResponse({'error': 'Challan list cannot be empty.'}, status=400)
 
             for challan_id in challan_ids:
                 try:
                     challan_instance = get_object_or_404(Challan, pk=challan_id)
                 except Http404:
-                    return JsonResponse({'error': f'Challan with id {challan_id} not found.'}, status=404)
+                    # Instead of returning an error, just skip this challan_id if not found
+                    continue
 
+                # Now check if the employee has relevant data in the challan
                 challan_production_records = ChallanProduction.objects.filter(
                     challan=challan_instance,
                     employee=employee_instance,
                     production__payment="NOT-PAID"
                 )
 
+                # If no relevant data for the employee in this challan, skip it
+                if not challan_production_records:
+                    continue  # Skip this challan and move to the next one
+
+                # Process records if found
                 for item in challan_production_records:
                     quantity = int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity
                     rate = int(item.production.rate) if item.production.rate % 1 == 0 else item.production.rate
@@ -93,10 +114,12 @@ def EmployeeBillFilter(request):
                         'amount': quantity * rate
                     })
 
-        else:
-            return JsonResponse({'error': 'Invalid filter method.'}, status=400)
+        # Return filtered data or a message if no data found
+        if not filtered_data:
+            return JsonResponse({'message': 'No records found matching the filter criteria.'}, status=200)
 
         return JsonResponse(filtered_data, safe=False, status=200)
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+

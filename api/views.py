@@ -9,7 +9,7 @@ from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-
+from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -171,4 +171,14 @@ def challan(request, pk):
 @csrf_exempt
 def employee_bill_filter(request):
     data = EmployeeBillFilter(request=request)
+    return data
+
+@csrf_exempt
+def add_employee_bill(request):
+    data = AddEmployeeBill(request=request)
+    return data
+
+
+def view_employee_bill(request, pk):
+    data = ViewAllEmployeeBill(request=request, pk=pk)
     return data
