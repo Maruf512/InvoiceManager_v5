@@ -1,9 +1,9 @@
+from ..models import Inventory, Customer, Challan, ChallanProduction
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from ..models import Inventory, Customer, Challan, ChallanProduction
-import json
-from math import ceil
 from collections import defaultdict
+from math import ceil
+import json
 
 
 # =======================

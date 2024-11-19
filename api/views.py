@@ -9,7 +9,7 @@ from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill
+from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill, ViewEmployeeBill
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -182,3 +182,9 @@ def add_employee_bill(request):
 def view_employee_bill(request, pk):
     data = ViewAllEmployeeBill(request=request, pk=pk)
     return data
+
+def view_single_employee_bill(request, pk):
+    data = ViewEmployeeBill(request=request, pk=pk)
+    return data
+
+

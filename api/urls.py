@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan, view_challan, challan, employee_bill_filter, add_employee_bill, view_employee_bill
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan, view_challan, challan, employee_bill_filter, add_employee_bill, view_employee_bill, view_single_employee_bill
 
 urlpatterns = [
     # Catagory Routing
@@ -49,6 +49,7 @@ urlpatterns = [
     path('employee/bill/filter/', employee_bill_filter, name="Employee Filter Section"),
     path('employee/bill/create/', add_employee_bill, name="Create Employee Bill"),
     path('employee/bill/view/<int:pk>/', view_employee_bill, name="View All Employee Bill"),
+    path('employee/bill/single/view/<int:pk>/', view_single_employee_bill, name="View Single Employee Bill"),
 
 ]
 

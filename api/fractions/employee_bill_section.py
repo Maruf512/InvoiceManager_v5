@@ -1,6 +1,7 @@
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse, Http404
 from ..models import Production, EmployeeBill, EmployeeBillProduction, Product
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from collections import defaultdict
 from django.db import transaction
 from math import ceil
 import json
@@ -104,4 +105,43 @@ def ViewAllEmployeeBill(request, pk):
 
 
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
+
+
+
+def ViewEmployeeBill(request, pk):
+    # Fetch the Challan object or return 404 if not found
+    employee_bill = get_object_or_404(EmployeeBill, pk=pk)
+    # Retrieve ChallanProduction entries associated with the Challan
+    employee_bill_production = EmployeeBillProduction.objects.filter(employee_bill_id=employee_bill.id)
+
+    # Use defaultdict to group data by employee and product
+    production_data = defaultdict(lambda: defaultdict(list))
+    
+    # Group ChallanProduction data by employee and product
+    for item in employee_bill_production:
+        production_data[item.product][item.production].append(item)
+
+    bill_data = []
+    sl_no = 1
+    for products in production_data.items():
+        product_qty = ""
+        amount = 0
+        total_qty = 0
+        for item in products[1]:
+            product_qty += f"{int(item.quantity) if item.quantity % 1 == 0 else item.quantity}, "
+            total_qty += int(item.quantity) if item.quantity % 1 == 0 else item.quantity
+            amount_calc = (int(item.quantity) if item.quantity % 1 == 0 else item.quantity) * (int(products[0].rate) if products[0].rate % 1 == 0 else products[0].rate)
+            amount += amount_calc
+
+
+        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':products[0].rate,'amount': amount})
+        sl_no += 1
+
+    
+    return JsonResponse(bill_data, safe=False, status=201)
+
+
+
+
+
 
