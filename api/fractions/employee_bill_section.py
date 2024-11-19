@@ -97,8 +97,8 @@ def ViewAllEmployeeBill(request, pk):
             'employee': {'id':item.employee.id, 'name': item.employee.name},
             'products': products_name,
             'production': production,
-            'quantity': f"{quantity} yds",
-            'Amount': f"{item.total_amount}/=",
+            'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} yds",
+            'Amount': f"{int(item.total_amount) if item.total_amount % 1 == 0 else item.total_amount}/=",
             'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")
         })
@@ -137,8 +137,11 @@ def ViewEmployeeBill(request, pk):
         bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':products[0].rate,'amount': amount})
         sl_no += 1
 
+
     
-    return JsonResponse(bill_data, safe=False, status=201)
+
+    
+    return JsonResponse({'date': employee_bill.created_at.strftime("%d %b %y"), 'grand_total': int(employee_bill.total_amount) if employee_bill.total_amount % 1 == 0 else employee_bill.total_amount, 'employee':{'id': employee_bill.id, 'name': employee_bill.employee.name}, 'data':bill_data}, safe=False, status=201)
 
 
 
