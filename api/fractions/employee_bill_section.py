@@ -16,6 +16,8 @@ def AddEmployeeBill(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
+    print(data)
+
     # Begin transaction to ensure atomicity
     try:
         with transaction.atomic():
@@ -24,6 +26,12 @@ def AddEmployeeBill(request):
                 return JsonResponse({'error': 'Employee ID is missing.'}, status=400)
 
             total_amount = sum(item.get('amount', 0) for item in data)
+
+            print("========================")
+            print(total_amount)
+            print("========================")
+
+
             employee_bill_record = EmployeeBill.objects.create(
                 employee_id=employee_id,
                 total_amount=total_amount,
@@ -130,11 +138,11 @@ def ViewEmployeeBill(request, pk):
         for item in products[1]:
             product_qty += f"{int(item.quantity) if item.quantity % 1 == 0 else item.quantity}, "
             total_qty += int(item.quantity) if item.quantity % 1 == 0 else item.quantity
-            amount_calc = (int(item.quantity) if item.quantity % 1 == 0 else item.quantity) * (int(products[0].rate) if products[0].rate % 1 == 0 else products[0].rate)
+            amount_calc = item.quantity * item.rate
             amount += amount_calc
 
 
-        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':products[0].rate,'amount': amount})
+        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':int(item.rate) if item.rate % 1 == 0 else item.rate,'amount': int(amount) if amount % 1 == 0 else amount})
         sl_no += 1
 
 
