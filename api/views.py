@@ -10,7 +10,7 @@ from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from .fractions.cashmemo_section import CashMemoFilter, AddCashMemo
+from .fractions.cashmemo_section import CashMemoFilter, AddCashMemo, ViewAllCashmemo
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -197,3 +197,6 @@ def add_cash_memo(request):
     return data
 
 
+def view_all_cashmemo(request, pk):
+    data = ViewAllCashmemo(request=request, pk=pk)
+    return data

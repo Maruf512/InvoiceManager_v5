@@ -100,3 +100,37 @@ def AddCashMemo(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+    
+
+def ViewAllCashmemo(request, pk):
+    data = []
+    limit = 10
+    offset = (pk - 1) * limit
+
+    # Order by created_at in descending order to fetch the latest first
+    total_records = CashMemo.objects.count()
+    number_of_pages = ceil(total_records / limit)
+    cashmemo_items = CashMemo.objects.all().order_by('-created_at')[offset:offset + limit]
+
+    for item in cashmemo_items:
+        products = []
+        challan = []
+        cashmemo_challan = CashMemoChallan.objects.filter(cashmemo=item.id).select_related('product', 'challan')
+
+        for i in cashmemo_challan:
+            if i.product.name not in products:
+                products.append(i.product.name)
+            
+            if i.challan.id not in challan:
+                challan.append(i.challan.id)
+
+        data.append({
+            'id': item.id,
+            'challan_no': challan,
+            'products': products,
+            'total_qty': item.total_yds,
+            'amount': item.total_amount,
+            'date': item.created_at.strftime("%d %b %y")
+        })
+
+    return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)

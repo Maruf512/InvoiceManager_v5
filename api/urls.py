@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan, view_challan, challan, employee_bill_filter, add_employee_bill, view_employee_bill, view_single_employee_bill, cash_memo_filter, add_cash_memo
+from .views import add_employees, view_employees, update_employee, delete_employee, add_customer, view_all_customer, update_customer, delete_customer, add_catagory, view_catagory, delete_catagory, add_products, view_all_products, update_products, delete_products, add_production, view_all_production, update_production, delete_production, add_inventory, view_inventory, update_inventory, delete_inventory, filter_inventory, add_challan, view_challan, challan, employee_bill_filter, add_employee_bill, view_employee_bill, view_single_employee_bill, cash_memo_filter, add_cash_memo, view_all_cashmemo
 
 urlpatterns = [
     # Catagory Routing
@@ -53,6 +53,7 @@ urlpatterns = [
 
 
     # Cash Memo Section
+    path('memo/view/<int:pk>/', view_all_cashmemo, name="View All Cash Memo"),
     path('memo/filter/<int:pk>/', cash_memo_filter, name="Filter Invoice For CashMemo"),
     path('memo/create/', add_cash_memo, name="Create CashMemo"),
 
