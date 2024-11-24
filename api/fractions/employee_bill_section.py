@@ -16,8 +16,6 @@ def AddEmployeeBill(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-    print(data)
-
     # Begin transaction to ensure atomicity
     try:
         with transaction.atomic():
@@ -73,7 +71,6 @@ def ViewAllEmployeeBill(request, pk):
     limit = 10
     offset = (pk - 1) * limit
 
-    # Order by created_at in descending order to fetch the latest first
     total_records = EmployeeBill.objects.count()
     number_of_pages = ceil(total_records / limit)
     employee_bill_items = EmployeeBill.objects.all().order_by('-created_at')[offset:offset + limit]
@@ -95,11 +92,9 @@ def ViewAllEmployeeBill(request, pk):
             if i.production.product.name not in products:
                 products.append(i.production.product.name)
 
-        # Process data
-        products_name = ", ".join(products)  # Use join to concatenate product names
-        production = production[:-3]  # Remove trailing ' + '
+        products_name = ", ".join(products)
+        production = production[:-3]
 
-        # Add item data to the response
         data.append({
             'id': item.id,
             'employee': {'id':item.employee.id, 'name': item.employee.name},
@@ -111,21 +106,15 @@ def ViewAllEmployeeBill(request, pk):
             'date': item.created_at.strftime("%d %b %y")
         })
 
-
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
 
-
 def ViewEmployeeBill(request, pk):
-    # Fetch the Challan object or return 404 if not found
     employee_bill = get_object_or_404(EmployeeBill, pk=pk)
-    # Retrieve ChallanProduction entries associated with the Challan
     employee_bill_production = EmployeeBillProduction.objects.filter(employee_bill_id=employee_bill.id)
 
-    # Use defaultdict to group data by employee and product
     production_data = defaultdict(lambda: defaultdict(list))
     
-    # Group ChallanProduction data by employee and product
     for item in employee_bill_production:
         production_data[item.product][item.production].append(item)
 
@@ -144,15 +133,5 @@ def ViewEmployeeBill(request, pk):
 
         bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':int(item.rate) if item.rate % 1 == 0 else item.rate,'amount': int(amount) if amount % 1 == 0 else amount})
         sl_no += 1
-
-
-    
-
     
     return JsonResponse({'date': employee_bill.created_at.strftime("%d %b %y"), 'grand_total': int(employee_bill.total_amount) if employee_bill.total_amount % 1 == 0 else employee_bill.total_amount, 'employee':{'id': employee_bill.id, 'name': employee_bill.employee.name}, 'data':bill_data}, safe=False, status=201)
-
-
-
-
-
-

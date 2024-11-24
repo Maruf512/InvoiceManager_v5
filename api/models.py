@@ -147,9 +147,7 @@ class ChallanProduction(models.Model):
 
 class CashMemo(models.Model):
     id = models.BigAutoField(primary_key=True)
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
     customer = models.ForeignKey(Customer, models.RESTRICT)
-    challan = models.ForeignKey(Challan, models.RESTRICT)
     total_yds = models.BigIntegerField()
     total_amount = models.BigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -158,3 +156,15 @@ class CashMemo(models.Model):
     class Meta:
         managed = False
         db_table = 'cash_memo'
+
+
+class CashMemoChallan(models.Model):
+    cashmemo = models.ForeignKey(CashMemo, on_delete=models.RESTRICT, db_column='cash_memo_id')
+    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
+    challan = models.ForeignKey(Challan, on_delete=models.RESTRICT, db_column='challan_id')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'cashmemo_Challan'
+        managed = False

@@ -1,5 +1,6 @@
 from .fractions.production_section import AddProduction, ViewProduction, UpdateProduction, DeleteProduction
 from .fractions.inventory_section import AddInventory, ViewInventory, UpdateInventory, DeleteInventory
+from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill, ViewEmployeeBill
 from .fractions.employee_section import AddEmployee, ViewEmployee, UpdateEmployee, DeleteEmployee
 from .fractions.customer_section import AddCustomer, ViewCustomer, UpdateCustomer, DeleteCustomer
 from .fractions.products_section import AddProducts, ViewProducts, UpdateProducts, DeleteProducts
@@ -9,7 +10,7 @@ from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill, ViewEmployeeBill
+from .fractions.cashmemo_section import CashMemoFilter, AddCashMemo
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -144,19 +145,16 @@ def delete_inventory(request, pk):
     return data
 
 
-# ===================================== Filter Inventory Section =====================================
+# ===================================== Challan Section =====================================
 @csrf_exempt
 def filter_inventory(request):
     data = FilterInventory(request=request)
     return data
 
-
-# ===================================== Challan Section =====================================
 @csrf_exempt
 def add_challan(request):
     data = AddChallan(request=request)
     return data
-
 
 def view_challan(request, pk):
     data = ViewAllChallan(request=request, pk=pk)
@@ -185,6 +183,17 @@ def view_employee_bill(request, pk):
 
 def view_single_employee_bill(request, pk):
     data = ViewEmployeeBill(request=request, pk=pk)
+    return data
+
+
+# ===================================== Cash Memo Section =====================================
+def cash_memo_filter(request, pk):
+    data = CashMemoFilter(request=request, pk=pk)
+    return data
+
+@csrf_exempt
+def add_cash_memo(request):
+    data = AddCashMemo(request=request)
     return data
 
 
