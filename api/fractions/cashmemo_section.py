@@ -62,8 +62,6 @@ def AddCashMemo(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        print(data.get('challan'))
-
         total_qty = 0
         amount = 0
         challan_production_data = []
@@ -76,13 +74,10 @@ def AddCashMemo(request):
                 rate = challan.product.rate
                 quantity = challan.production.quantity
                 amount += rate * quantity
-                print(challan.production.product.name)
                 challan_production_data.append({'product_id': challan.product, 'challan_id': challan.challan})
 
             customer = challan_instinct.customer.id
             total_qty += float(challan_instinct.total)
-            
-        print(f"customer: {customer}, total_yds: {total_qty}, total_amount: {amount}")
 
         cashmemo = CashMemo.objects.create(
             customer = get_object_or_404(Customer, pk= customer),
@@ -97,9 +92,11 @@ def AddCashMemo(request):
                 product = get_object_or_404(Product, pk=item['product_id'].id),
                 challan = get_object_or_404(Challan, pk=item['challan_id'].id)
             )
+            invoice = Challan.objects.get(id=item['challan_id'].id)
+            invoice.current_status = "PAID"
+            invoice.save()
 
         return JsonResponse({'message':'added successfully'}, status=200)
-
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
