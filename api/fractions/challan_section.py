@@ -75,6 +75,7 @@ def ViewAllChallan(request, pk):
         # Add item data to the response
         data.append({
             'id': item.id,
+            'customer': {'id': item.customer.id, 'name': item.customer.name},
             'products': products_name,
             'quantity': quantity,
             'total': f"{item.total} yds",
