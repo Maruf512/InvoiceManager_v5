@@ -158,6 +158,7 @@ def SingleViewCashmemo(request, pk):
         data.append([product, challan_list])
 
     slno = 1
+    total_amount = 0
     for i in data:
         product = i[0]
         challan = i[1]
@@ -169,10 +170,12 @@ def SingleViewCashmemo(request, pk):
             for challan_production in challan_production_instinct:
                 quantity += challan_production.production.quantity
 
-        return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan, 'quantity': int(quantity) if quantity % 1 == 0 else quantity, 'rate': product_instinct.rate, 'amount': int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)})
+        amount = int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)
+        return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan, 'quantity': int(quantity) if quantity % 1 == 0 else quantity, 'rate': product_instinct.rate, 'amount': amount})
+        total_amount += amount
         slno += 1
 
-    return JsonResponse(return_data, safe=False, status=200)
+    return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address, 'date': memo.created_at.strftime("%d %b %y"), 'memo_id':memo.id, 'total_amount':total_amount}] + return_data, safe=False, status=200)
 
 
 
