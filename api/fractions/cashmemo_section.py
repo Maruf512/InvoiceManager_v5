@@ -1,5 +1,3 @@
-from anyio.abc import value
-
 from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoChallan, Product, Production
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -129,6 +127,7 @@ def ViewAllCashmemo(request, pk):
 
         data.append({
             'id': item.id,
+            'customer': {'id': item.customer.id, 'name': item.customer.name},
             'challan_no': challan,
             'products': products,
             'total_qty': item.total_yds,
