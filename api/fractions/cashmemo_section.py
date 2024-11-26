@@ -1,6 +1,9 @@
+from anyio.abc import value
+
+from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoChallan, Product, Production
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoChallan, Product
+from collections import defaultdict
 from math import ceil
 import json
 
@@ -134,3 +137,42 @@ def ViewAllCashmemo(request, pk):
         })
 
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
+
+
+def SingleViewCashmemo(request, pk):
+    memo = get_object_or_404(CashMemo, pk=pk)
+    memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
+
+    # Use defaultdict to group data by product and Challan
+    challan_data = defaultdict(lambda: defaultdict(list))
+    for item in memo_challan:
+        challan_data[item.product.id][item.challan.id].append(item)
+
+    return_data = []
+    data = []
+    for product, challan in challan_data.items():
+        challan_list = []
+        for item in challan:
+            challan_list.append(item)
+
+        data.append([product, challan_list])
+
+    slno = 1
+    for i in data:
+        product = i[0]
+        challan = i[1]
+        product_instinct = get_object_or_404(Product, pk=product)
+        quantity = 0
+        for item in challan:
+            challan_production_instinct = ChallanProduction.objects.filter(challan=item, product=product_instinct)
+            # get quantity
+            for challan_production in challan_production_instinct:
+                quantity += challan_production.production.quantity
+
+        return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan, 'quantity': int(quantity) if quantity % 1 == 0 else quantity, 'rate': product_instinct.rate, 'amount': int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)})
+        slno += 1
+
+    return JsonResponse(return_data, safe=False, status=200)
+
+
+

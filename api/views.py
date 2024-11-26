@@ -1,4 +1,5 @@
 from .fractions.production_section import AddProduction, ViewProduction, UpdateProduction, DeleteProduction
+from .fractions.cashmemo_section import CashMemoFilter, AddCashMemo, ViewAllCashmemo, SingleViewCashmemo
 from .fractions.inventory_section import AddInventory, ViewInventory, UpdateInventory, DeleteInventory
 from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBill, ViewEmployeeBill
 from .fractions.employee_section import AddEmployee, ViewEmployee, UpdateEmployee, DeleteEmployee
@@ -10,7 +11,6 @@ from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from .fractions.cashmemo_section import CashMemoFilter, AddCashMemo, ViewAllCashmemo
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -196,7 +196,10 @@ def add_cash_memo(request):
     data = AddCashMemo(request=request)
     return data
 
-
 def view_all_cashmemo(request, pk):
     data = ViewAllCashmemo(request=request, pk=pk)
+    return data
+
+def view_single_memo(request, pk):
+    data = SingleViewCashmemo(request=request, pk=pk)
     return data
