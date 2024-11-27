@@ -2,6 +2,9 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
+    # Dashboard Routing
+    path('dashboard/', dashboard, name="Dashboard"),
+
     # Catagory Routing
     path('catagory/create/', add_catagory, name="add_catagory"),
     path('catagory/view/', view_catagory, name="view_catagory"),
@@ -25,7 +28,7 @@ urlpatterns = [
     path('production/update/<int:pk>/', update_production, name="Update Production"),
     path('production/delete/<int:pk>/', delete_production, name="delete_products"),
     
-    # Inventory Section
+    # Inventory Routing
     path('inventory/add/', add_inventory, name="add production to inventory"),
     path('inventory/view/<int:pk>/', view_inventory, name="view_inventory"),
     path('inventory/update/<int:pk>/', update_inventory, name="Update Inventory"),
@@ -37,7 +40,7 @@ urlpatterns = [
     path('customer/update/<int:pk>/', update_customer, name="update_customer"),
     path('customer/delete/<int:pk>/', delete_customer, name="delete_customer"),
 
-    # Challan Section
+    # Challan Routing
     path('challan/<int:pk>/', challan, name="View Single Challan"),
     path('challan/create/', add_challan, name="add_challan"),
     path('challan/view/<int:pk>/', view_challan, name="View Challan"),
@@ -47,17 +50,16 @@ urlpatterns = [
     # get data from inventory for challan
     path('inventory/filter/', filter_inventory, name="Get Inventory by Employee"),
 
-    # Employee Bill Section
+    # Employee Bill Routing
     path('employee/bill/filter/', employee_bill_filter, name="Employee Filter Section"),
     path('employee/bill/create/', add_employee_bill, name="Create Employee Bill"),
     path('employee/bill/view/<int:pk>/', view_employee_bill, name="View All Employee Bill"),
     path('employee/bill/single/view/<int:pk>/', view_single_employee_bill, name="View Single Employee Bill"),
 
-    # Cash Memo Section
+    # Cash Memo Routing
     path('memo/create/', add_cash_memo, name="Create CashMemo"),
     path('memo/view/<int:pk>/', view_all_cashmemo, name="View All Cash Memo"),
     path('memo/filter/<int:pk>/', cash_memo_filter, name="Filter Invoice For CashMemo"),
     path('memo/single/view/<int:pk>/', view_single_memo, name="View Single Memo"),
-
 ]
 

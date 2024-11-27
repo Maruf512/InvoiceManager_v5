@@ -58,7 +58,7 @@ def ViewProducts(request, pk):
             catagory_name = get_object_or_404(Category, pk=i.category.id)
             print(i.production_cost)
             print(i.other_cost)
-            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'category':catagory_name.name, 'production_cost':i.production_cost, 'other_cost':i.other_cost})
+            data.append({'id': i.id, 'name': i.name, 'category':catagory_name.name, 'rate': i.rate, 'production_cost':i.production_cost, 'other_cost':i.other_cost})
 
         print(data)
 
