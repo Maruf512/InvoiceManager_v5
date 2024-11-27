@@ -1,4 +1,4 @@
-from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoChallan, Product, Production
+from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoChallan, Product
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from collections import defaultdict
@@ -17,7 +17,7 @@ def CashMemoFilter(request, pk):
     challan_items = Challan.objects.all().filter(
         current_status="NOT-PAID",
         customer = customer_instinct
-    ).order_by('-created_at')
+    ).order_by('-id')
 
     for item in challan_items:
         products = []
@@ -81,7 +81,7 @@ def AddCashMemo(request):
             total_qty += float(challan_instinct.total)
 
         cashmemo = CashMemo.objects.create(
-            customer = get_object_or_404(Customer, pk= customer),
+            customer = get_object_or_404(Customer, pk=customer),
             total_yds = total_qty,
             total_amount = amount
         )
@@ -111,7 +111,7 @@ def ViewAllCashmemo(request, pk):
     # Order by created_at in descending order to fetch the latest first
     total_records = CashMemo.objects.count()
     number_of_pages = ceil(total_records / limit)
-    cashmemo_items = CashMemo.objects.all().order_by('-created_at')[offset:offset + limit]
+    cashmemo_items = CashMemo.objects.all().order_by('-id')[offset:offset + limit]
 
     for item in cashmemo_items:
         products = []
@@ -142,7 +142,7 @@ def SingleViewCashmemo(request, pk):
     memo = get_object_or_404(CashMemo, pk=pk)
     memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
 
-    # Use defaultdict to group data by product and Challan
+    # Use default-dict to group data by product and Challan
     challan_data = defaultdict(lambda: defaultdict(list))
     for item in memo_challan:
         challan_data[item.product.id][item.challan.id].append(item)

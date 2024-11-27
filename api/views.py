@@ -9,8 +9,10 @@ from .fractions.catagory_section import AddCatagory, ViewCatagory, DeleteCatagor
 from .fractions.challan_section import AddChallan, ViewChallan, ViewAllChallan
 from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
+from .fractions.simple_invoice_section import SimpleInvoice
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
+
 
 # ====================== Employee Section =====================
 @csrf_exempt
@@ -203,3 +205,10 @@ def view_all_cashmemo(request, pk):
 def view_single_memo(request, pk):
     data = SingleViewCashmemo(request=request, pk=pk)
     return data
+
+@csrf_exempt
+def simple_invoice(request):
+    data = SimpleInvoice(request)
+    return data
+
+

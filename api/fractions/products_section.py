@@ -21,10 +21,12 @@ def AddProducts(request):
         name = data.get('name')
         rate = data.get('rate')
         catagory_id = data.get('category')
+        production_cost = data.get('production_cost')
+        other_cost = data.get('other_cost')
 
         category = get_object_or_404(Category, pk=catagory_id)
 
-        products = Product.objects.create(name=name, rate=rate, category=category)
+        products = Product.objects.create(name=name, rate=rate, category=category, production_cost=production_cost, other_cost=other_cost)
         products.save()
         
         return JsonResponse({'message': 'Products added successfully.'}, status=201)
@@ -39,7 +41,7 @@ def AddProducts(request):
 def ViewProducts(request, pk):
     data = []
     if pk > 0:
-        query = Product.objects.all().order_by('-created_at')
+        query = Product.objects.all().order_by('-id')
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit
@@ -54,7 +56,11 @@ def ViewProducts(request, pk):
         
         for i in filter_records:
             catagory_name = get_object_or_404(Category, pk=i.category.id)
-            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'category':catagory_name.name})
+            print(i.production_cost)
+            print(i.other_cost)
+            data.append({'id': i.id, 'name': i.name, 'rate': i.rate, 'category':catagory_name.name, 'production_cost':i.production_cost, 'other_cost':i.other_cost})
+
+        print(data)
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 

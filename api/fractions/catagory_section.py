@@ -29,7 +29,7 @@ def AddCatagory(request):
 # ===== View Catagory
 # ======================
 def ViewCatagory(request):
-    catagory = Category.objects.all().order_by('-created_at')
+    catagory = Category.objects.all().order_by('-id')
     serializer = CatagorySerializer(catagory, many=True)
     return JsonResponse(serializer.data, safe=False)
 

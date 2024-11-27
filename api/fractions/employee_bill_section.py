@@ -73,7 +73,7 @@ def ViewAllEmployeeBill(request, pk):
 
     total_records = EmployeeBill.objects.count()
     number_of_pages = ceil(total_records / limit)
-    employee_bill_items = EmployeeBill.objects.all().order_by('-created_at')[offset:offset + limit]
+    employee_bill_items = EmployeeBill.objects.all().order_by('-id')[offset:offset + limit]
 
     for item in employee_bill_items:
         products = []

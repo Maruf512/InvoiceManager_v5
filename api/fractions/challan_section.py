@@ -51,7 +51,7 @@ def ViewAllChallan(request, pk):
     # Order by created_at in descending order to fetch the latest first
     total_records = Challan.objects.count()
     number_of_pages = ceil(total_records / limit)
-    challan_items = Challan.objects.all().order_by('-created_at')[offset:offset + limit]
+    challan_items = Challan.objects.all().order_by('-id')[offset:offset + limit]
 
     sl_no = offset + 1 
     for item in challan_items:

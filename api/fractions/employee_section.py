@@ -40,7 +40,7 @@ def AddEmployee(request):
 # =======================
 def ViewEmployee(request, pk):
     if pk > 0:
-        query = Employee.objects.all().order_by('-created_at')
+        query = Employee.objects.all().order_by('-id')
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit

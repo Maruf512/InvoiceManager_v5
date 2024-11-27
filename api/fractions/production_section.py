@@ -21,13 +21,12 @@ def AddProduction(request):
         products_id = data.get('product')
         employee_id = data.get('employee')
         quantity = data.get('quantity')
-        rate = data.get('rate')
         current_status = "IN-STOCK"
 
         product = get_object_or_404(Product, pk=products_id)
         employee = get_object_or_404(Employee, pk=employee_id)
 
-        production = Production.objects.create(product=product, employee=employee, quantity=quantity, rate=rate)
+        production = Production.objects.create(product=product, employee=employee, quantity=quantity, rate=product.production_cost)
         production.save()
 
         # add data in inventory
@@ -46,7 +45,7 @@ def AddProduction(request):
 def ViewProduction(request, pk):
     data = []
     if pk > 0:
-        query = Production.objects.all().order_by('-created_at')
+        query = Production.objects.all().order_by('-id')
         limit = 10
         offset = (pk - 1) * limit
         number_of_pages = len(query)/limit

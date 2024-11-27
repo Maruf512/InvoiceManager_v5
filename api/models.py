@@ -16,6 +16,8 @@ class Product(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
     rate = models.IntegerField()
+    production_cost = models.FloatField(db_column='production_cost')
+    other_cost = models.FloatField(default=0, db_column='other_cost')
     category = models.ForeignKey(
         Category,
         models.RESTRICT,
