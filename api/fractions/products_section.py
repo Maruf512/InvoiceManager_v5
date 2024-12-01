@@ -60,8 +60,6 @@ def ViewProducts(request, pk):
             print(i.other_cost)
             data.append({'id': i.id, 'name': i.name, 'category':catagory_name.name, 'rate': i.rate, 'production_cost':i.production_cost, 'other_cost':i.other_cost})
 
-        print(data)
-
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
 

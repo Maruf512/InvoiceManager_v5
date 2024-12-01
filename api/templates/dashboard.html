@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <!-- Header -->
+    <header class="bg-green-700 text-white py-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Inventory Management Dashboard</h1>
+            <nav>
+                <a href="/" class="px-4 py-2 hover:bg-green-600 rounded">Home</a>
+                <a href="/categories/" class="px-4 py-2 hover:bg-green-600 rounded">Categories</a>
+                <a href="/products/" class="px-4 py-2 hover:bg-green-600 rounded">Products</a>
+                <a href="/employees/" class="px-4 py-2 hover:bg-green-600 rounded">Employees</a>
+                <a href="/inventory/" class="px-4 py-2 hover:bg-green-600 rounded">Inventory</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Container -->
+    <div class="container mx-auto py-6">
+        <!-- Summary Metrics -->
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-white">Summary Metrics</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400">Categories</h3>
+                    <p class="text-2xl font-bold">{{ categories_count }}</p>
+                </div>
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400">Products</h3>
+                    <p class="text-2xl font-bold">{{ products_count }}</p>
+                </div>
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400">Employees</h3>
+                    <p class="text-2xl font-bold">{{ employees_count }}</p>
+                </div>
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400">Inventory</h3>
+                    <p class="text-xl">In Stock: <span class="font-bold">{{ in_stock }}</span></p>
+                    <p class="text-xl">Sold: <span class="font-bold">{{ sold_count }}</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Employee of the Month -->
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-white">Employee of the Month</h2>
+            <div class="bg-gray-800 p-4 shadow rounded">
+                <p class="text-lg font-semibold text-green-400">Employee: {{ employee_of_the_month.employee__name }}</p>
+                <p class="text-xl text-gray-300">Total Payments: <span class="font-bold">${{ employee_of_the_month.total_payment }}</span></p>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-white">Recent Activity</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400 mb-2">Latest Productions</h3>
+                    <ul class="list-disc pl-5 text-gray-300">
+                        {% for production in recent_productions %}
+                            <li>{{ production.product.name }} - {{ production.quantity }} units</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400 mb-2">Recent Employee Bills</h3>
+                    <ul class="list-disc pl-5 text-gray-300">
+                        {% for bill in recent_employee_bills %}
+                            <li>{{ bill.employee.name }} - ${{ bill.total_amount }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="bg-gray-800 p-4 shadow rounded">
+                    <h3 class="text-lg font-semibold text-green-400 mb-2">Recent Challans</h3>
+                    <ul class="list-disc pl-5 text-gray-300">
+                        {% for challan in recent_challans %}
+                            <li>{{ challan.customer.name }} - ${{ challan.total }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sales Report (Circular Doughnut Chart) - Moved to Bottom -->
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-white">Sales Report</h2>
+            <div class="bg-gray-800 p-4 shadow rounded">
+                <!-- Resize chart with a defined height and width -->
+                <canvas id="salesChart" width="300" height="300"></canvas>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Sales data for the doughnut chart
+        const salesData = {
+            labels: [ {% for sale in last_month_sales %} "{{ sale.product__name }}", {% endfor %} ],
+            datasets: [{
+                label: 'Sales',
+                data: [ {% for sale in last_month_sales %} {{ sale.total_sales }}, {% endfor %} ],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                ],
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+                borderWidth: 1,
+            }]
+        };
+
+        // Doughnut chart configuration
+        const config = {
+            type: 'doughnut',
+            data: salesData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, // Ensure the chart's size is based on canvas size
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'white'  // Change legend text color to white
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + ' units';
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Initialize the chart
+        const salesChart = new Chart(
+            document.getElementById('salesChart'),
+            config
+        );
+    </script>
+
+</body>
+</html>
