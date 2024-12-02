@@ -25,11 +25,6 @@ def AddEmployeeBill(request):
 
             total_amount = sum(item.get('amount', 0) for item in data)
 
-            print("========================")
-            print(total_amount)
-            print("========================")
-
-
             employee_bill_record = EmployeeBill.objects.create(
                 employee_id=employee_id,
                 total_amount=total_amount,

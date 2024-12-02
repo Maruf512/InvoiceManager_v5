@@ -56,8 +56,6 @@ def ViewProducts(request, pk):
         
         for i in filter_records:
             catagory_name = get_object_or_404(Category, pk=i.category.id)
-            print(i.production_cost)
-            print(i.other_cost)
             data.append({'id': i.id, 'name': i.name, 'category':catagory_name.name, 'rate': i.rate, 'production_cost':i.production_cost, 'other_cost':i.other_cost})
 
         return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)

@@ -97,7 +97,7 @@ def AddCashMemo(request):
             invoice.current_status = "PAID"
             invoice.save()
 
-        return JsonResponse({'message':'added successfully'}, status=200)
+        return JsonResponse({'message':'added successfully', 'cashmemo': cashmemo.id}, status=200)
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
