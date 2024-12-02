@@ -2,6 +2,7 @@ from ..models import Inventory, Customer, Challan, ChallanProduction
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from collections import defaultdict
+from datetime import datetime
 from math import ceil
 import json
 
@@ -18,6 +19,9 @@ def AddChallan(request):
         
         inventory_id = data.get('inventory_id')
         customer = get_object_or_404(Customer, pk=data.get("customer_id"))
+        date = data.get('date')
+        print(date)
+        print(type(date))
         total = 0
         current_status = "NOT-PAID"
 
@@ -26,6 +30,12 @@ def AddChallan(request):
             total += inventory.production.quantity
 
         challan = Challan.objects.create(customer=customer, total=total, current_status=current_status)
+        try:
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            challan.created_at = date_obj
+        except ValueError:
+            pass
+
         challan.save()
 
         for item in inventory_id:

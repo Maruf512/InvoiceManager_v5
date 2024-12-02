@@ -2,6 +2,7 @@ from ..models import Customer, Employee, Product, Production, Challan, ChallanPr
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.db import transaction
+from datetime import datetime
 import json
 
 
@@ -19,6 +20,7 @@ def SimpleInvoice(request):
 
                 # Extract data from production list
                 production_list = data.get('production')
+                date = data.get('date')
 
                 # Saved production and inventory IDs
                 saved_production = []
@@ -60,6 +62,14 @@ def SimpleInvoice(request):
                     total=total_qty,
                     current_status="NOT-PAID"
                 )
+
+                try:
+                    date_obj = datetime.strptime(date, "%Y-%m-%d")
+                    challan_instinct.created_at = date_obj
+                except ValueError:
+                    pass
+
+                challan_instinct.save()
 
                 # Create challanProduction entries and update inventory
                 for item in saved_inventory:
