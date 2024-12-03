@@ -49,7 +49,6 @@ def CashMemoFilter(request, pk):
             'quantity': quantity,
             'total': f"{item.total} yds",
             'amount': int(amount) if amount % 1 == 0 else amount,
-            'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")  # Format date as "13 Nov 2024"
         })
 
