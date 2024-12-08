@@ -1,59 +1,141 @@
-from django.shortcuts import render
 from django.db.models import Sum
-from ..models import EmployeeBill, Production, Employee, Challan, Product, Category, Inventory
+from ..models import EmployeeBill, Production, Employee, Challan, Product, Category, Inventory, Customer
 from datetime import datetime
-from django.db.models import F
+from django.http import JsonResponse
 
 def ViewDashboard(request):
-    # Employee of the Month - Highest paid employee
-    employee_of_the_month = EmployeeBill.objects.values('employee__name').annotate(
-        total_payment=Sum('total_amount')).order_by('-total_payment').first()
-
-    # Recent Productions (last 5)
-    recent_productions = Production.objects.select_related('product').order_by('-created_at')[:5]
-
-    # Recent Employee Bills (last 5)
-    recent_employee_bills = EmployeeBill.objects.select_related('employee').order_by('-created_at')[:5]
-
-    # Recent Challans (last 5)
-    recent_challans = Challan.objects.select_related('customer').order_by('-created_at')[:5]
-
-    # Total Sales Report - Total sales by product (last month)
+    # Current Month
     current_month = datetime.now().month
-    last_month_sales = Production.objects.filter(
-        created_at__month=current_month
-    ).values('product__name').annotate(
-        total_sales=Sum('quantity')
-    ).order_by('-total_sales')
 
-    # Categories Count
-    categories_count = Category.objects.count()
-
-    # Products Count
-    products_count = Product.objects.count()
-
+    # ============================ Overview ==========================
     # Employees Count
-    employees_count = Employee.objects.count()
+    total_employee = Employee.objects.count()
 
-    # Inventory in stock and sold
-    in_stock = Inventory.objects.filter(current_status="IN-STOCK").count()
-    sold_count = Inventory.objects.filter(current_status="OUT-OF-STOCK").count()
+    # Customers Count
+    total_customers = Customer.objects.count()
 
-    print({
-        'employee_of_the_month': {'name': 'employee name', 'paid': 12000}
+    # Total Inventories
+    total_inventory = Inventory.objects.count()
 
-    })
+    # Total Invoice
+    total_invoice = Challan.objects.count()
+
+    # Total Products
+    total_products = Product.objects.count()
+
+    # Total Production
+    total_production = Production.objects.count()
+
+    # Total Category
+    total_category = Category.objects.count()
+
+    # Active Employee
+    activeEmployee = Production.objects.filter(created_at__month=current_month).values('employee__id').distinct().count()
+
+    # ============================= Employee of the Month ===========================
+    # Employee of the Month
+    producedUnites = 0
+    try:
+        employee_of_the_month = EmployeeBill.objects.filter(created_at__month=current_month).values('employee__name', 'employee__id').annotate(total_payment=Sum('total_amount')).order_by('-total_payment').first()
+        # producedUnites
+        producedUnitesQuery = Production.objects.filter(payment="PAID", created_at__month=current_month, employee_id=employee_of_the_month['employee__id']).values("product__name").annotate(total_unites=Sum('quantity'))
+        for item in producedUnitesQuery:
+            producedUnites += item.get('total_unites')
+    except:
+        employee_of_the_month = {'employee__name': 'NONE', 'employee__id': 0, 'total_payment': 0}
 
 
-    return render(request, 'dashboard.html', {
-        'employee_of_the_month': employee_of_the_month,
-        'recent_productions': recent_productions,
-        'recent_employee_bills': recent_employee_bills,
-        'recent_challans': recent_challans,
-        'last_month_sales': last_month_sales,
-        'categories_count': categories_count,
-        'products_count': products_count,
-        'employees_count': employees_count,
-        'in_stock': in_stock,
-        'sold_count': sold_count
-    })
+    # =============================== Top 5 Employees based on Production ==========================
+    try:
+        top_employees = (Production.objects.values("employee__name", "employee__id").annotate(total_unites=Sum('quantity')).order_by('-total_unites'))[:5]
+    except:
+        total_employee = [{'employee__name': 'NONE', 'employee__id': 0, 'total_unites': 0}, {'employee__name': 'NONE', 'employee__id': 0, 'total_unites': 0}, {'employee__name': 'NONE', 'employee__id': 0, 'total_unites': 0}, {'employee__name': 'NONE', 'employee__id': 0, 'total_unites': 0}, {'employee__name': 'NONE', 'employee__id': 0, 'total_unites': 0}]
+
+
+    # =============================== Invoice Section ==========================
+    try:
+        InvoicereceivedPayment = Challan.objects.filter(current_status='PAID').count()
+    except:
+        InvoicereceivedPayment = 0
+
+    try:
+        Invoicepending = Challan.objects.filter(current_status='NOT-PAID').count()
+    except:
+        Invoicepending = 0
+
+
+    # =============================== Inventory Section ==========================
+    try:
+        Inventory_inStock = Inventory.objects.filter(current_status="IN-STOCK").count()
+    except:
+        Inventory_inStock = 0
+
+    try:
+        Inventory_sold_count = Inventory.objects.filter(current_status="OUT-OF-STOCK").count()
+    except:
+        Inventory_sold_count = 0
+
+
+    # =============================== Production Section ==========================
+    try:
+        total_productionIn_a_Month = Production.objects.filter(created_at__month=current_month).count()
+    except:
+        total_productionIn_a_Month = 0
+
+    try:
+        due_production_in_a_month = Production.objects.filter(created_at__month=current_month, payment="NOT-PAID").count()
+    except:
+        due_production_in_a_month = 0
+
+
+    # =============================== Top Sold Products Section ==========================
+    try:
+        topSoledProducts = Inventory.objects.filter(current_status="OUT-OF-STOCK").values("product__name", "product__id").annotate(sold_unites=Sum('production__quantity')).order_by('-sold_unites').first()
+    except:
+        topSoledProducts = {'product__name': 'NONE', 'product__id': 0, 'sold_unites': 0}
+
+
+    data = {
+        'employee': {
+            'totalEmployee': total_employee,
+            'activeEmployee': activeEmployee,
+            'employeeOftheMonth': {
+                'name': employee_of_the_month['employee__name'] if employee_of_the_month else "NONE",
+                'id': employee_of_the_month['employee__id'] if employee_of_the_month else 0,
+                'totalEarned': employee_of_the_month['total_payment'] if employee_of_the_month else 0,
+                'producedUnites': producedUnites,
+            },
+            'topEmployees': [{
+                'name': emp['employee__name'],
+                'id': emp['employee__id']
+            } for emp in top_employees],
+        },
+        'invoice': {
+            'receivedPayment': InvoicereceivedPayment,
+            'pending': Invoicepending,
+            'total': total_invoice,
+        },
+        'inventory': {
+            'inStock': Inventory_inStock,
+            'sold': Inventory_sold_count,
+            'total': total_inventory,
+        },
+        'totalCustomer': total_customers,
+        'production': {
+            'totalProduction': total_production,
+            'totalProductionInAMounth': total_productionIn_a_Month,
+            'due': due_production_in_a_month,
+        },
+        'products': {
+            'totalProducts': total_products,
+            'topSoledProducts': {
+                'name': topSoledProducts['product__name'] if topSoledProducts else "NONE",
+                'id': topSoledProducts['product__id'] if topSoledProducts else 0,
+                'soldUnits': topSoledProducts['sold_unites'] if topSoledProducts else 0,
+            },
+        },
+        'totalCategory': total_category,
+    }
+
+
+    return JsonResponse(data=data, safe=False, status=200)
