@@ -96,7 +96,7 @@ def ViewAllEmployeeBill(request, pk):
             'products': products_name,
             'production': production,
             'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} yds",
-            'Amount': f"{int(item.total_amount) if item.total_amount % 1 == 0 else item.total_amount}/=",
+            'Amount': int(item.total_amount) if item.total_amount % 1 == 0 else item.total_amount,
             'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")
         })
