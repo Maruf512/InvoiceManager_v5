@@ -20,7 +20,7 @@ CREATE TABLE products(
     production_cost FLOAT NOT NULL,
     other_cost FLOAT DEFAULT 0 NOT NULL,
     catagory_id BIGINT UNSIGNED NOT NULL,
-    Foreign Key (`catagory_id`) REFERENCES catagory (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`catagory_id`) REFERENCES catagory (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -42,8 +42,8 @@ CREATE TABLE production(
     quantity FLOAT NOT NULL,
     rate FLOAT NOT NULL,
     payment VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
-    Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`products_id`) REFERENCES products (`id`),
+    Foreign Key (`employee_id`) REFERENCES employee (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -54,9 +54,9 @@ CREATE TABLE inventory(
     products_id BIGINT UNSIGNED NOT NULL,
     production_id BIGINT UNSIGNED NOT NULL,
     current_status VARCHAR(50) DEFAULT 'IN-STOCK' NOT NULL,                     -- Check if it is sold or not if it is sold then change it to SOLD
-    Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    Foreign Key (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`employee_id`) REFERENCES employee (`id`),
+    Foreign Key (`products_id`) REFERENCES products (`id`),
+    Foreign Key (`production_id`) REFERENCES production (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -66,7 +66,7 @@ CREATE TABLE employee_bill(
     employee_id BIGINT UNSIGNED NOT NULL,
     total_amount FLOAT NOT NULL,
     current_status VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
-    Foreign Key (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`employee_id`) REFERENCES employee (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -79,9 +79,9 @@ CREATE TABLE employee_bill_production (
     rate FLOAT NOT NULL,
     quantity FLOAT NOT NULL,
     amount FLOAT NOT NULL,
-    FOREIGN KEY (`employee_bill_id`) REFERENCES employee_bill (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (`employee_bill_id`) REFERENCES employee_bill (`id`),
+    FOREIGN KEY (`products_id`) REFERENCES products (`id`),
+    FOREIGN KEY (`production_id`) REFERENCES production (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -103,7 +103,7 @@ CREATE TABLE challan(
     customer_id BIGINT UNSIGNED NOT NULL,
     total VARCHAR(100) NOT NULL,
     current_status VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
-    Foreign Key (`customer_id`) REFERENCES customer (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`customer_id`) REFERENCES customer (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -114,10 +114,10 @@ CREATE TABLE challan_production (
     products_id BIGINT UNSIGNED NOT NULL,
     employee_id BIGINT UNSIGNED NOT NULL,
     production_id BIGINT UNSIGNED NOT NULL,
-    FOREIGN KEY (`challan_id`) REFERENCES challan (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`employee_id`) REFERENCES employee (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`production_id`) REFERENCES production (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (`challan_id`) REFERENCES challan (`id`),
+    FOREIGN KEY (`products_id`) REFERENCES products (`id`),
+    FOREIGN KEY (`employee_id`) REFERENCES employee (`id`),
+    FOREIGN KEY (`production_id`) REFERENCES production (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -128,7 +128,7 @@ CREATE TABLE cash_memo(
     customer_id BIGINT UNSIGNED NOT NULL,
     total_yds BIGINT NOT NULL,
     total_amount BIGINT NOT NULL,
-    Foreign Key (`customer_id`) REFERENCES customer (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    Foreign Key (`customer_id`) REFERENCES customer (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -139,9 +139,9 @@ CREATE TABLE cashmemo_Challan(
     cash_memo_id BIGINT UNSIGNED NOT NULL,
     products_id BIGINT UNSIGNED NOT NULL,
     challan_id BIGINT UNSIGNED NOT NULL,
-    FOREIGN KEY (`cash_memo_id`) REFERENCES cash_memo (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-    Foreign Key (`challan_id`) REFERENCES challan (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (`cash_memo_id`) REFERENCES cash_memo (`id`),
+    FOREIGN KEY (`products_id`) REFERENCES products (`id`),
+    Foreign Key (`challan_id`) REFERENCES challan (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )

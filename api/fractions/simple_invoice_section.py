@@ -63,11 +63,11 @@ def SimpleInvoice(request):
                     current_status="NOT-PAID"
                 )
 
-                # try:
-                #     date_obj = datetime.strptime(date, "%Y-%m-%d")
-                #     challan_instinct.created_at = date_obj
-                # except ValueError:
-                #     pass
+                try:
+                    date_obj = datetime.strptime(date, "%Y-%m-%d")
+                    challan_instinct.created_at = date_obj
+                except ValueError:
+                    pass
 
                 challan_instinct.save()
 
