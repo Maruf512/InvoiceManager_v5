@@ -5,8 +5,8 @@ from .fractions.employee_bill_section import AddEmployeeBill, ViewAllEmployeeBil
 from .fractions.employee_section import AddEmployee, ViewEmployee, UpdateEmployee, DeleteEmployee
 from .fractions.customer_section import AddCustomer, ViewCustomer, UpdateCustomer, DeleteCustomer
 from .fractions.products_section import AddProducts, ViewProducts, UpdateProducts, DeleteProducts
+from .fractions.challan_section import AddChallan, ViewChallan, ViewAllChallan, DeleteChallan
 from .fractions.catagory_section import AddCatagory, ViewCatagory, DeleteCatagory
-from .fractions.challan_section import AddChallan, ViewChallan, ViewAllChallan
 from .fractions.employee_bill_filter_section import EmployeeBillFilter
 from .fractions.filter_inventory_section import FilterInventory
 from .fractions.simple_invoice_section import SimpleInvoice
@@ -163,6 +163,11 @@ def view_challan(request, pk):
     data = ViewAllChallan(request=request, pk=pk)
     return data
 
+def delete_challan(request, pk):
+    data = DeleteChallan(request=request, pk=pk)
+    return data
+
+
 def challan(request, pk):
     data = ViewChallan(request=request, pk=pk)
     return data
@@ -207,6 +212,7 @@ def view_all_cashmemo(request, pk):
     data = ViewAllCashmemo(request=request, pk=pk)
     return data
 
+@csrf_exempt
 def view_single_memo(request, pk):
     data = SingleViewCashmemo(request=request, pk=pk)
     return data

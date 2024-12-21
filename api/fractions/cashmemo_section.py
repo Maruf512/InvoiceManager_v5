@@ -138,42 +138,71 @@ def ViewAllCashmemo(request, pk):
 
 
 def SingleViewCashmemo(request, pk):
-    memo = get_object_or_404(CashMemo, pk=pk)
-    memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-    # Use default-dict to group data by product and Challan
-    challan_data = defaultdict(lambda: defaultdict(list))
-    for item in memo_challan:
-        challan_data[item.product.id][item.challan.id].append(item)
+        memo_formate = data.get('format')
 
-    return_data = []
-    data = []
-    for product, challan in challan_data.items():
-        challan_list = []
-        for item in challan:
-            challan_list.append(item)
+        if memo_formate == 'format1':
+            memo = get_object_or_404(CashMemo, pk=pk)
+            memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
 
-        data.append([product, challan_list])
+            # Use default-dict to group data by product and Challan
+            challan_data = defaultdict(lambda: defaultdict(list))
+            for item in memo_challan:
+                challan_data[item.product.id][item.challan.id].append(item)
 
-    slno = 1
-    total_amount = 0
-    for i in data:
-        product = i[0]
-        challan = i[1]
-        product_instinct = get_object_or_404(Product, pk=product)
-        quantity = 0
-        for item in challan:
-            challan_production_instinct = ChallanProduction.objects.filter(challan=item, product=product_instinct)
-            # get quantity
-            for challan_production in challan_production_instinct:
-                quantity += challan_production.production.quantity
+            return_data = []
+            data = []
+            for product, challan in challan_data.items():
+                challan_list = []
+                for item in challan:
+                    challan_list.append(item)
 
-        amount = int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)
-        return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan, 'quantity': int(quantity) if quantity % 1 == 0 else quantity, 'rate': product_instinct.rate, 'amount': amount})
-        total_amount += amount
-        slno += 1
+                data.append([product, challan_list])
 
-    return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address, 'date': memo.created_at.strftime("%d %b %y"), 'memo_id':memo.id, 'total_amount':total_amount}] + return_data, safe=False, status=200)
+            slno = 1
+            total_amount = 0
+            for i in data:
+                product = i[0]
+                challan = i[1]
+                product_instinct = get_object_or_404(Product, pk=product)
+                quantity = 0
+                for item in challan:
+                    challan_production_instinct = ChallanProduction.objects.filter(challan=item,
+                                                                                   product=product_instinct)
+                    # get quantity
+                    for challan_production in challan_production_instinct:
+                        quantity += challan_production.production.quantity
+
+                amount = int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (
+                        product_instinct.rate * quantity)
+                return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan,
+                                    'quantity': int(quantity) if quantity % 1 == 0 else quantity,
+                                    'rate': product_instinct.rate,
+                                    'amount': amount})
+                total_amount += amount
+                slno += 1
+
+            return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address,
+                                  'date': memo.created_at.strftime("%d %b %y"), 'memo_id': memo.id,
+                                  'total_amount': total_amount}] + return_data, safe=False, status=200)
+
+        # Formate 2
+        elif memo_formate == 'format2':
+            print("Formate 2")
+        else:
+            pass
 
 
+
+
+        return JsonResponse({'message': 'Success'}, status=200)
+
+
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
 

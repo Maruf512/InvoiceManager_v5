@@ -47,8 +47,8 @@ class Employee(models.Model):
 
 class Production(models.Model):
     id = models.BigAutoField(primary_key=True)
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    employee = models.ForeignKey(Employee, models.RESTRICT)
+    product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
+    employee = models.ForeignKey(Employee, models.CASCADE)
     quantity = models.FloatField()
     rate = models.FloatField()
     payment = models.CharField(max_length=50, default='NOT-PAID')
@@ -62,9 +62,9 @@ class Production(models.Model):
 
 class Inventory(models.Model):
     id = models.BigAutoField(primary_key=True)
-    employee = models.ForeignKey(Employee, models.RESTRICT)
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    production = models.ForeignKey(Production, models.RESTRICT)
+    employee = models.ForeignKey(Employee, models.CASCADE)
+    product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
+    production = models.ForeignKey(Production, models.CASCADE)
     current_status = models.CharField(max_length=50, default='IN-STOCK')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,7 +76,7 @@ class Inventory(models.Model):
 
 class EmployeeBill(models.Model):
     id = models.BigAutoField(primary_key=True)
-    employee = models.ForeignKey(Employee, models.RESTRICT, db_column='employee_id')
+    employee = models.ForeignKey(Employee, models.CASCADE, db_column='employee_id')
     total_amount = models.FloatField()
     current_status = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -88,9 +88,9 @@ class EmployeeBill(models.Model):
 
 
 class EmployeeBillProduction(models.Model):
-    employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.RESTRICT, db_column='employee_bill_id')
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    production = models.ForeignKey(Production, on_delete=models.RESTRICT, db_column='production_id')
+    employee_bill_id = models.ForeignKey(EmployeeBill, on_delete=models.CASCADE, db_column='employee_bill_id')
+    product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
+    production = models.ForeignKey(Production, on_delete=models.CASCADE, db_column='production_id')
     rate = models.FloatField()
     quantity = models.FloatField()
     amount = models.FloatField()
@@ -121,7 +121,7 @@ class Customer(models.Model):
 
 class Challan(models.Model):
     id = models.BigAutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, models.RESTRICT)
+    customer = models.ForeignKey(Customer, models.CASCADE)
     total = models.CharField(max_length=100)
     current_status = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -134,10 +134,10 @@ class Challan(models.Model):
 
 # Junction table to connect Production to Challan
 class ChallanProduction(models.Model):
-    challan = models.ForeignKey(Challan, on_delete=models.RESTRICT)
-    employee = models.ForeignKey(Employee, models.RESTRICT, db_column='employee_id')
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    production = models.ForeignKey(Production, on_delete=models.RESTRICT)
+    challan = models.ForeignKey(Challan, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, models.CASCADE, db_column='employee_id')
+    product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
+    production = models.ForeignKey(Production, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -149,7 +149,7 @@ class ChallanProduction(models.Model):
 
 class CashMemo(models.Model):
     id = models.BigAutoField(primary_key=True)
-    customer = models.ForeignKey(Customer, models.RESTRICT)
+    customer = models.ForeignKey(Customer, models.CASCADE)
     total_yds = models.BigIntegerField()
     total_amount = models.BigIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -161,9 +161,9 @@ class CashMemo(models.Model):
 
 
 class CashMemoChallan(models.Model):
-    cashmemo = models.ForeignKey(CashMemo, on_delete=models.RESTRICT, db_column='cash_memo_id')
-    product = models.ForeignKey(Product, models.RESTRICT, db_column='products_id')
-    challan = models.ForeignKey(Challan, on_delete=models.RESTRICT, db_column='challan_id')
+    cashmemo = models.ForeignKey(CashMemo, on_delete=models.CASCADE, db_column='cash_memo_id')
+    product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
+    challan = models.ForeignKey(Challan, on_delete=models.CASCADE, db_column='challan_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

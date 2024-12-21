@@ -137,6 +137,4 @@ def ViewDashboard(request):
         'totalCategory': total_category,
     }
 
-
-
     return JsonResponse(data=data, safe=False, status=200)

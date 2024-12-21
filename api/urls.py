@@ -44,6 +44,7 @@ urlpatterns = [
     path('challan/<int:pk>/', challan, name="View Single Challan"),
     path('challan/create/', add_challan, name="add_challan"),
     path('challan/view/<int:pk>/', view_challan, name="View Challan"),
+    path('challan/delete/<int:pk>/', delete_challan, name="Delete Challan"),
     # Simple Invoice Section
     path('invoice/create/', simple_invoice, name="Create Simple Invoice"),
     # Filter

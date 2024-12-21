@@ -1,5 +1,6 @@
 from ..models import Inventory, Customer, Challan, ChallanProduction
 from django.shortcuts import get_object_or_404
+from django.db.utils import IntegrityError
 from django.http import JsonResponse
 from collections import defaultdict
 from datetime import datetime
@@ -156,3 +157,22 @@ def ViewChallan(request, pk):
 
     # Return the invoice data as a JSON response
     return JsonResponse(invoice_data, safe=False, status=201)
+
+def DeleteChallan(request, pk):
+    challan = get_object_or_404(Challan, pk=pk)
+    try:
+        # Change inventory status
+        challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
+        for production in challan_production:
+            inventory_instincts = Inventory.objects.filter(production=production.get('production')).values('id')
+            print(inventory_instincts)
+            inventory = get_object_or_404(Inventory, pk=inventory_instincts[0].get('id'))
+            inventory.current_status = "IN-STOCK"
+            inventory.save()
+
+        # delete challan
+        challan.delete()
+    except IntegrityError:
+        return JsonResponse({'message': "Can't remove it from Invoice"}, status=201)
+    return JsonResponse({'message': 'Removed Invoice from database.'}, status=201)
+
