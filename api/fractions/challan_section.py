@@ -21,8 +21,6 @@ def AddChallan(request):
         inventory_id = data.get('inventory_id')
         customer = get_object_or_404(Customer, pk=data.get("customer_id"))
         date = data.get('date')
-        print(date)
-        print(type(date))
         total = 0
         current_status = "NOT-PAID"
 
@@ -165,7 +163,6 @@ def DeleteChallan(request, pk):
         challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
         for production in challan_production:
             inventory_instincts = Inventory.objects.filter(production=production.get('production')).values('id')
-            print(inventory_instincts)
             inventory = get_object_or_404(Inventory, pk=inventory_instincts[0].get('id'))
             inventory.current_status = "IN-STOCK"
             inventory.save()

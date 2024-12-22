@@ -6,8 +6,8 @@ CREATE DATABASE nft_management
 
 CREATE TABLE catagory(
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    name VARCHAR(100),
-    unit VARCHAR(50) NOT NULL DEFAULT 'yds',
+    name VARCHAR(100) NOT NULL,
+    unit VARCHAR(20) NOT NULL DEFAULT 'yds',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )
@@ -42,7 +42,7 @@ CREATE TABLE production(
     quantity FLOAT NOT NULL,
     rate FLOAT NOT NULL,
     payment VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
-    Foreign Key (`products_id`) REFERENCES products (`id`),
+    Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT,
     Foreign Key (`employee_id`) REFERENCES employee (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -128,6 +128,9 @@ CREATE TABLE cash_memo(
     customer_id BIGINT UNSIGNED NOT NULL,
     total_yds BIGINT NOT NULL,
     total_amount BIGINT NOT NULL,
+    discount FLOAT NOT NULL DEFAULT 0,
+    total_after_discount FLOAT NOT NULL DEFAULT 0,
+    discount_method VARCHAR(20) NOT NULL DEFAULT '%',
     Foreign Key (`customer_id`) REFERENCES customer (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

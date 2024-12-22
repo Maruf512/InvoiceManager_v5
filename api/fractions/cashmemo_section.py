@@ -2,6 +2,7 @@ from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoCha
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from collections import defaultdict
+from  datetime import datetime
 from math import ceil
 import json
 
@@ -62,6 +63,8 @@ def AddCashMemo(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
+        print(data)
+
         total_qty = 0
         amount = 0
         challan_production_data = []
@@ -69,7 +72,7 @@ def AddCashMemo(request):
             challan_instinct = get_object_or_404(Challan, pk=challan_id)
             challan_production_instinct = ChallanProduction.objects.filter(challan_id=challan_instinct)
 
-            
+
             for challan in challan_production_instinct:
                 rate = challan.product.rate
                 quantity = challan.production.quantity
@@ -79,11 +82,37 @@ def AddCashMemo(request):
             customer = challan_instinct.customer.id
             total_qty += float(challan_instinct.total)
 
+
+        #Calculate discount
+        discount = 0
+        discount_method = "TK"
+        if data['discount'] != 0:
+            if data['discountMethod'] == 'percent':
+                discount_method = "%"
+                discount = data['discount']
+                discount_amount = amount - (amount * discount / 100)
+
+            elif data['discountMethod'] == 'amount':
+                discount = data['discount']
+                discount_amount = amount - discount
+
+
         cashmemo = CashMemo.objects.create(
             customer = get_object_or_404(Customer, pk=customer),
             total_yds = total_qty,
-            total_amount = amount
+            total_amount = amount,
+            discount = discount,
+            discount_method = discount_method,
+            total_after_discount = discount_amount,
         )
+
+        # Process Date
+        date = data.get('date')
+        try:
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            cashmemo.created_at = date_obj
+        except ValueError:
+            pass
 
 
         for item in challan_production_data:
@@ -193,7 +222,23 @@ def SingleViewCashmemo(request, pk):
 
         # Formate 2
         elif memo_formate == 'format2':
-            print("Formate 2")
+
+            return_data = [{'challanid': 1, 'products': "Mat22\"", 'date': "10/11/24", 'quantity': 10, 'rate': 100, 'amount': 1000},
+                           {'challanid': 2, 'products': "Mat22\"", 'date': "11/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 3, 'products': "Mat22\"", 'date': "12/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 4, 'products': "Mat22\"", 'date': "13/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 5, 'products': "Mat22\"", 'date': "14/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 6, 'products': "Mat22\"", 'date': "15/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 7, 'products': "Mat22\"", 'date': "16/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 8, 'products': "Mat22\"", 'date': "17/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 9, 'products': "Mat22\"", 'date': "18/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           {'challanid': 10, 'products': "Mat22\"", 'date': "19/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
+                           ]
+
+
+            return JsonResponse([{'customer': "Customer Name", 'address': "Karatia",
+                                  'date': "10/12/24", 'memo_id': 1,
+                                  'total_amount': 10000}] + return_data, safe=False, status=200)
         else:
             pass
 

@@ -3,7 +3,8 @@ from django.db import models
 
 class Category(models.Model):
     id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=100, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    unit = models.CharField(max_length=20, default='yds')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -152,6 +153,11 @@ class CashMemo(models.Model):
     customer = models.ForeignKey(Customer, models.CASCADE)
     total_yds = models.BigIntegerField()
     total_amount = models.BigIntegerField()
+
+    discount = models.FloatField(max_length=100, default=0)
+    total_after_discount = models.FloatField(max_length=100, default=0)
+    discount_method = models.CharField(max_length=20, default='%')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
