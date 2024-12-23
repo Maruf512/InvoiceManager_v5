@@ -2,6 +2,7 @@ from ..models import Challan, ChallanProduction, Customer, CashMemo, CashMemoCha
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from collections import defaultdict
+from django.db.models import Sum
 from  datetime import datetime
 from math import ceil
 import json
@@ -233,22 +234,48 @@ def SingleViewCashmemo(request, pk):
         # Formate 2
         elif memo_formate == 'format2':
 
-            return_data = [{'challanid': 1, 'products': "Mat22\"", 'date': "10/11/24", 'quantity': 10, 'rate': 100, 'amount': 1000},
-                           {'challanid': 2, 'products': "Mat22\"", 'date': "11/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 3, 'products': "Mat22\"", 'date': "12/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 4, 'products': "Mat22\"", 'date': "13/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 5, 'products': "Mat22\"", 'date': "14/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 6, 'products': "Mat22\"", 'date': "15/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 7, 'products': "Mat22\"", 'date': "16/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 8, 'products': "Mat22\"", 'date': "17/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 9, 'products': "Mat22\"", 'date': "18/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           {'challanid': 10, 'products': "Mat22\"", 'date': "19/11/24", 'quantity': 10, 'rate': 100,'amount': 1000},
-                           ]
+            memo = get_object_or_404(CashMemo, pk=pk)
+            # get discount data from db
+            total_after_discount = memo.total_after_discount
+
+            memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
+
+            # Use default-dict to group data by product and Challan
+            challan_data = defaultdict(lambda: defaultdict(list))
+            for item in memo_challan:
+                challan_data[item.product.id][item.challan.id].append(item)
+
+            return_data = []
+            data = []
+            total_amount = 0
+            for product, challan in challan_data.items():
+                for item in challan:
+                    print(product, item)
+
+                    challan_instinct = get_object_or_404(Challan, pk=item)
+                    product_instinct = get_object_or_404(Product, pk=product)
+
+                    challan_production_instinct = ChallanProduction.objects.filter(challan=challan_instinct, product=product_instinct).values("production__quantity")
+
+                    quantity = 0
+
+                    for i in challan_production_instinct:
+                        quantity += i['production__quantity']
+
+                    total_amount += int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)
 
 
-            return JsonResponse([{'customer': "Customer Name", 'address': "Karatia",
-                                  'date': "10/12/24", 'memo_id': 1,
-                                  'total_amount': 10000}] + return_data, safe=False, status=200)
+                    return_data.append({'challanid': challan_instinct.id,
+                                        'products': f"{product_instinct.name}",
+                                        'date': f"{challan_instinct.created_at.strftime("%d %b %y")}",
+                                        'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} {product_instinct.category.unit}",
+                                        'rate': int(product_instinct.rate) if product_instinct.rate % 1 == 0 else product_instinct.rate,
+                                        'amount': total_amount})
+
+            return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address,
+                                  'date': memo.created_at.strftime("%d %b %y"), 'memo_id': memo.id,
+                                  'total_amount': total_amount,
+                                  'total_after_discount': total_after_discount}] + return_data, safe=False, status=200)
         else:
             pass
 

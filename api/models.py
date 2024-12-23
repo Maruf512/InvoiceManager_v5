@@ -19,11 +19,7 @@ class Product(models.Model):
     rate = models.IntegerField()
     production_cost = models.FloatField(db_column='production_cost')
     other_cost = models.FloatField(default=0, db_column='other_cost')
-    category = models.ForeignKey(
-        Category,
-        models.RESTRICT,
-        db_column='catagory_id'
-    )
+    category = models.ForeignKey(Category, models.RESTRICT, db_column='catagory_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
