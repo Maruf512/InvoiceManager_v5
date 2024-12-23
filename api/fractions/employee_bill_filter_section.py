@@ -56,7 +56,7 @@ def EmployeeBillFilter(request):
                         'name': item.product.name,
                         'category': item.product.category.name
                     },
-                    'quantity': quantity,
+                    'quantity': f"{quantity} { item.product.category.unit}",
                     'rate': rate,
                     'amount': quantity * rate
                 })
@@ -109,7 +109,7 @@ def EmployeeBillFilter(request):
                             'id': item.challan.id,
                             'date': item.challan.created_at.strftime("%d %b %y")  # Fixed formatting
                         },
-                        'quantity': quantity,
+                        'quantity': f"{quantity} { item.production.product.category.unit}",
                         'rate': rate,
                         'amount': quantity * rate
                     })

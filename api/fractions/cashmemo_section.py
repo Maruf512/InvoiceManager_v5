@@ -27,6 +27,8 @@ def CashMemoFilter(request, pk):
         challan_production = ChallanProduction.objects.filter(challan=item.id)
         
         for i in challan_production:
+            # set units
+            unit = i.production.product.category.unit
             if i.production.quantity % 1 == 0:
                 quantity += f"{int(i.production.quantity)} + "
             else:
@@ -48,7 +50,7 @@ def CashMemoFilter(request, pk):
             'id': item.id,
             'products': products_name,
             'quantity': quantity,
-            'total': f"{item.total} yds",
+            'total': f"{item.total} {unit}",
             'amount': int(amount) if amount % 1 == 0 else amount,
             'date': item.created_at.strftime("%d %b %y")  # Format date as "13 Nov 2024"
         })
@@ -114,6 +116,7 @@ def AddCashMemo(request):
         except ValueError:
             pass
 
+        challan.save()
 
         for item in challan_production_data:
             cashmemo_challan = CashMemoChallan.objects.create(
@@ -147,6 +150,7 @@ def ViewAllCashmemo(request, pk):
         cashmemo_challan = CashMemoChallan.objects.filter(cashmemo=item.id).select_related('product', 'challan')
 
         for i in cashmemo_challan:
+            unit = i.product.category.unit
             if i.product.name not in products:
                 products.append(i.product.name)
             
@@ -158,7 +162,7 @@ def ViewAllCashmemo(request, pk):
             'customer': {'id': item.customer.id, 'name': item.customer.name},
             'challan_no': challan,
             'products': products,
-            'total_qty': item.total_yds,
+            'total_qty': f"{item.total_yds} {unit}",
             'amount': item.total_amount,
             'date': item.created_at.strftime("%d %b %y")
         })
@@ -175,8 +179,12 @@ def SingleViewCashmemo(request, pk):
 
         memo_formate = data.get('format')
 
+        # Formate 1
         if memo_formate == 'format1':
             memo = get_object_or_404(CashMemo, pk=pk)
+            # get discount data from db
+            total_after_discount = memo.total_after_discount
+
             memo_challan = CashMemoChallan.objects.filter(cashmemo=memo).select_related('product', 'challan')
 
             # Use default-dict to group data by product and Challan
@@ -205,20 +213,22 @@ def SingleViewCashmemo(request, pk):
                                                                                    product=product_instinct)
                     # get quantity
                     for challan_production in challan_production_instinct:
+                        unit = challan_production.product.category.unit
                         quantity += challan_production.production.quantity
 
                 amount = int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (
                         product_instinct.rate * quantity)
                 return_data.append({'slno': slno, 'products': product_instinct.name, 'challan': challan,
-                                    'quantity': int(quantity) if quantity % 1 == 0 else quantity,
+                                    'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} {unit}",
                                     'rate': product_instinct.rate,
                                     'amount': amount})
                 total_amount += amount
                 slno += 1
 
+
             return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address,
                                   'date': memo.created_at.strftime("%d %b %y"), 'memo_id': memo.id,
-                                  'total_amount': total_amount}] + return_data, safe=False, status=200)
+                                  'total_amount': total_amount, 'total_after_discount':total_after_discount}] + return_data, safe=False, status=200)
 
         # Formate 2
         elif memo_formate == 'format2':

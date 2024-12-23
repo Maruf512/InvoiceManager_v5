@@ -49,7 +49,7 @@ def FilterInventory(request):
                 },
                 'production': {
                     'id': record.production.id,
-                    'quantity': record.production.quantity
+                    'quantity': f"{int(record.production.quantity) if record.production.quantity % 1 == 0 else record.production.quantity} {record.production.product.category.unit}"
                 }
             })
 

@@ -69,6 +69,7 @@ def ViewAllChallan(request, pk):
         challan_production = ChallanProduction.objects.filter(challan=item.id)
         
         for i in challan_production:
+            unites = i.production.product.category.unit
             if i.production.quantity % 1 == 0:
                 quantity += f"{int(i.production.quantity)} + "
             else:
@@ -87,7 +88,7 @@ def ViewAllChallan(request, pk):
             'customer': {'id': item.customer.id, 'name': item.customer.name},
             'products': products_name,
             'quantity': quantity,
-            'total': f"{item.total} yds",
+            'total': f"{item.total} {unites}",
             'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")  # Format date as "13 Nov 2024"
         })
@@ -120,6 +121,8 @@ def ViewChallan(request, pk):
     # Iterate over grouped data
     for employee_id, products in production_data.items():
         for product_id, items in products.items():
+            # set unites
+            unites = items[0].production.product.category.unit
             # Calculate total and quantities
             production_qty = ''
             total = 0
@@ -134,7 +137,7 @@ def ViewChallan(request, pk):
                 'employee': items[0].production.employee.name,
                 'product': items[0].product.name,
                 'quantity': production_qty[:-1],  # Remove the last "+" from the quantity
-                'total': total
+                'total': f"{total} {unites}"
             })
 
     # Update Challan's grand total if necessary
@@ -149,7 +152,7 @@ def ViewChallan(request, pk):
         'customer_address': challan.customer.address,
         'challan_no': challan.id,
         'date': challan.created_at.strftime("%d %b %y"),
-        'grand_total': f"{challan.total} yds",
+        'grand_total': f"{challan.total} {unites}",
         'total_column': total_column
     }
 

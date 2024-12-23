@@ -42,7 +42,7 @@ CREATE TABLE production(
     quantity FLOAT NOT NULL,
     rate FLOAT NOT NULL,
     payment VARCHAR(50) DEFAULT 'NOT-PAID' NOT NULL,
-    Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE RESTRICT,
+    Foreign Key (`products_id`) REFERENCES products (`id`) ON DELETE NO ACTION ON UPDATE CASCADE,
     Foreign Key (`employee_id`) REFERENCES employee (`id`),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

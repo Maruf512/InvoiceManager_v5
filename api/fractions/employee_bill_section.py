@@ -77,6 +77,7 @@ def ViewAllEmployeeBill(request, pk):
         employee_bill_production = EmployeeBillProduction.objects.filter(employee_bill_id=item.id)
         
         for i in employee_bill_production:
+            unites = i.production.product.category.unit
             if i.production.quantity % 1 == 0:
                 production += f"{int(i.production.quantity)} + "
                 quantity += int(i.production.quantity)
@@ -95,7 +96,7 @@ def ViewAllEmployeeBill(request, pk):
             'employee': {'id':item.employee.id, 'name': item.employee.name},
             'products': products_name,
             'production': production,
-            'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} yds",
+            'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} {unites}",
             'Amount': int(item.total_amount) if item.total_amount % 1 == 0 else item.total_amount,
             'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")
@@ -125,8 +126,9 @@ def ViewEmployeeBill(request, pk):
             amount_calc = item.quantity * item.rate
             amount += amount_calc
 
+        unites = products[0].category.unit
 
-        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':total_qty, 'rate':int(item.rate) if item.rate % 1 == 0 else item.rate,'amount': int(amount) if amount % 1 == 0 else amount})
+        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':f"{total_qty} {unites}", 'rate':int(item.rate) if item.rate % 1 == 0 else item.rate,'amount': int(amount) if amount % 1 == 0 else amount})
         sl_no += 1
     
     return JsonResponse({'date': employee_bill.created_at.strftime("%d %b %y"), 'grand_total': int(employee_bill.total_amount) if employee_bill.total_amount % 1 == 0 else employee_bill.total_amount, 'employee':{'id': employee_bill.id, 'name': employee_bill.employee.name}, 'data':bill_data}, safe=False, status=201)
