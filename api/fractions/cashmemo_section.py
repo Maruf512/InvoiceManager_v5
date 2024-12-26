@@ -66,7 +66,6 @@ def AddCashMemo(request):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        print(data)
 
         total_qty = 0
         amount = 0
@@ -98,6 +97,9 @@ def AddCashMemo(request):
             elif data['discountMethod'] == 'amount':
                 discount = data['discount']
                 discount_amount = amount - discount
+
+        else:
+            discount_amount = amount
 
 
         cashmemo = CashMemo.objects.create(
