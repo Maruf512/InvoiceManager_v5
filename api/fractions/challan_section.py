@@ -1,4 +1,4 @@
-from ..models import Inventory, Customer, Challan, ChallanProduction
+from ..models import Inventory, Customer, Challan, ChallanProduction, Production
 from django.shortcuts import get_object_or_404
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
@@ -159,19 +159,40 @@ def ViewChallan(request, pk):
     # Return the invoice data as a JSON response
     return JsonResponse(invoice_data, safe=False, status=201)
 
-def DeleteChallan(request, pk):
-    challan = get_object_or_404(Challan, pk=pk)
+def DeleteChallan(request):
     try:
-        # Change inventory status
-        challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
-        for production in challan_production:
-            inventory_instincts = Inventory.objects.filter(production=production.get('production')).values('id')
-            inventory = get_object_or_404(Inventory, pk=inventory_instincts[0].get('id'))
-            inventory.current_status = "IN-STOCK"
-            inventory.save()
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
-        # delete challan
-        challan.delete()
+    try:
+        id = data['id']
+        deleteRelatedData = data['deleteRelatedData']
+
+        challan = get_object_or_404(Challan, pk=id)
+
+        if deleteRelatedData == False:
+            # Change inventory status
+            challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
+            for production in challan_production:
+                inventory_instincts = Inventory.objects.filter(production=production.get('production')).values('id')
+                inventory = get_object_or_404(Inventory, pk=inventory_instincts[0].get('id'))
+                inventory.current_status = "IN-STOCK"
+                inventory.save()
+
+            # delete challan and challan production
+            ChallanProduction.objects.filter(challan=challan).delete()
+            challan.delete()
+
+        elif deleteRelatedData == True:
+            challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
+            for production in challan_production:
+                production_instinct = get_object_or_404(Production, pk=production['production'])
+                production_instinct.delete()
+
+            ChallanProduction.objects.filter(challan=challan).delete()
+            challan.delete()
+
     except IntegrityError:
         return JsonResponse({'message': "Can't remove it from Invoice"}, status=201)
     return JsonResponse({'message': 'Removed Invoice from database.'}, status=201)

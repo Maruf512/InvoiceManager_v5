@@ -17,7 +17,8 @@ def AddCatagory(request):
             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
 
         name = data.get('name')
-        catagory = Category.objects.create(name=name)
+        unit = data.get('unit')
+        catagory = Category.objects.create(name=name, unit=unit)
         catagory.save()
         
         return JsonResponse({'message': 'Catagory registered successfully.'}, status=201)

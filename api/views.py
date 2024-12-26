@@ -163,8 +163,9 @@ def view_challan(request, pk):
     data = ViewAllChallan(request=request, pk=pk)
     return data
 
-def delete_challan(request, pk):
-    data = DeleteChallan(request=request, pk=pk)
+@csrf_exempt
+def delete_challan(request):
+    data = DeleteChallan(request=request)
     return data
 
 
