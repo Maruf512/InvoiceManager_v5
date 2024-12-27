@@ -75,7 +75,7 @@ def ViewAllEmployeeBill(request, pk):
         production = ""
         quantity = 0
         employee_bill_production = EmployeeBillProduction.objects.filter(employee_bill_id=item.id)
-        
+        unites = ''
         for i in employee_bill_production:
             unites = i.production.product.category.unit
             if i.production.quantity % 1 == 0:

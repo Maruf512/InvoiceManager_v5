@@ -58,7 +58,8 @@ def EmployeeBillFilter(request):
                     },
                     'quantity': f"{quantity} { item.product.category.unit}",
                     'rate': rate,
-                    'amount': quantity * rate
+                    'amount': quantity * rate,
+                    'date': item.created_at.strftime("%d %b %y")
                 })
 
         # **Challan-based Filter**
@@ -105,10 +106,7 @@ def EmployeeBillFilter(request):
                             'name': item.production.product.name,
                             'category': item.production.product.category.name
                         },
-                        'challan': {
-                            'id': item.challan.id,
-                            'date': item.challan.created_at.strftime("%d %b %y")  # Fixed formatting
-                        },
+                        'date': item.challan.created_at.strftime("%d %b %y"),
                         'quantity': f"{quantity} { item.production.product.category.unit}",
                         'rate': rate,
                         'amount': quantity * rate

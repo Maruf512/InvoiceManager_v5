@@ -1,4 +1,4 @@
-from ..models import Inventory, Customer, Challan, ChallanProduction, Production
+from ..models import Inventory, Customer, Challan, ChallanProduction, Production, EmployeeBillProduction, EmployeeBill
 from django.shortcuts import get_object_or_404
 from django.db.utils import IntegrityError
 from django.http import JsonResponse
@@ -186,12 +186,38 @@ def DeleteChallan(request):
 
         elif deleteRelatedData == True:
             challan_production = list(ChallanProduction.objects.filter(challan=challan).values('production'))
+
+            production_exists_in_payment = False
+
             for production in challan_production:
                 production_instinct = get_object_or_404(Production, pk=production['production'])
-                production_instinct.delete()
+                production_exists = EmployeeBillProduction.objects.filter(production=production_instinct).count()
+                if production_exists > 0:
+                    production_exists_in_payment = True
 
-            ChallanProduction.objects.filter(challan=challan).delete()
-            challan.delete()
+
+
+
+            if production_exists_in_payment == False:
+                for production in challan_production:
+                    production_instinct = get_object_or_404(Production, pk=production['production'])
+                    production_instinct.delete()
+
+                ChallanProduction.objects.filter(challan=challan).delete()
+                challan.delete()
+
+            else:
+                # Change inventory status
+                challan_production = list(ChallanProduction.objects.filter(challan=challan.id).values('production'))
+                for production in challan_production:
+                    inventory_instincts = Inventory.objects.filter(production=production.get('production')).values('id')
+                    inventory = get_object_or_404(Inventory, pk=inventory_instincts[0].get('id'))
+                    inventory.current_status = "IN-STOCK"
+                    inventory.save()
+
+                ChallanProduction.objects.filter(challan=challan).delete()
+                challan.delete()
+
 
     except IntegrityError:
         return JsonResponse({'message': "Can't remove it from Invoice"}, status=201)
