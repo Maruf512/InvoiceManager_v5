@@ -71,36 +71,30 @@ def ViewAllEmployeeBill(request, pk):
     employee_bill_items = EmployeeBill.objects.all().order_by('-id')[offset:offset + limit]
 
     for item in employee_bill_items:
-        products = []
-        production = ""
-        quantity = 0
-        employee_bill_production = EmployeeBillProduction.objects.filter(employee_bill_id=item.id)
-        unites = ''
-        for i in employee_bill_production:
-            unites = i.production.product.category.unit
-            if i.production.quantity % 1 == 0:
-                production += f"{int(i.production.quantity)} + "
-                quantity += int(i.production.quantity)
-            else:
-                production += f"{i.production.quantity} + "
-                quantity += i.production.quantity
+        single_view_data = ViewEmployeeBill(request, item.id)
+        single_view_data = json.loads(single_view_data.content)
 
-            if i.production.product.name not in products:
-                products.append(i.production.product.name)
-
-        products_name = ", ".join(products)
-        production = production[:-3]
+        products = ""
+        quantity = ""
+        total_qty = 0
+        raw_data = single_view_data['data']
+        unit = raw_data[0]['total_qty'].split(' ')[-1]
+        for product in raw_data:
+            products += product['products']
+            quantity += product['quantity']
+            total_qty += float(product['total_qty'][:-4])
 
         data.append({
             'id': item.id,
-            'employee': {'id':item.employee.id, 'name': item.employee.name},
-            'products': products_name,
-            'production': production,
-            'quantity': f"{int(quantity) if quantity % 1 == 0 else quantity} {unites}",
-            'Amount': int(item.total_amount) if item.total_amount % 1 == 0 else item.total_amount,
+            'employee': single_view_data['employee'],
+            'products': products,
+            'production': quantity,
+            'quantity': f"{total_qty} {unit}",
+            'Amount': single_view_data['grand_total'],
             'current_status': item.current_status,
             'date': item.created_at.strftime("%d %b %y")
         })
+
 
     return JsonResponse([{"total_page": number_of_pages}] + data, safe=False)
 
@@ -123,12 +117,18 @@ def ViewEmployeeBill(request, pk):
         for item in products[1]:
             product_qty += f"{int(item.quantity) if item.quantity % 1 == 0 else item.quantity}, "
             total_qty += int(item.quantity) if item.quantity % 1 == 0 else item.quantity
-            amount_calc = item.quantity * item.rate
+            amount_calc = item.quantity * item.product.production_cost
             amount += amount_calc
 
         unites = products[0].category.unit
 
-        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':f"{total_qty} {unites}", 'rate':int(item.rate) if item.rate % 1 == 0 else item.rate,'amount': int(amount) if amount % 1 == 0 else amount})
+        bill_data.append({'sl_no': sl_no, 'products': f"{products[0].name}", 'quantity':f"{product_qty[:-2]}", 'total_qty':f"{total_qty} {unites}", 'rate':int(item.product.production_cost) if item.product.production_cost % 1 == 0 else item.product.production_cost,'amount': int(amount) if amount % 1 == 0 else amount})
         sl_no += 1
-    
-    return JsonResponse({'date': employee_bill.created_at.strftime("%d %b %y"), 'grand_total': int(employee_bill.total_amount) if employee_bill.total_amount % 1 == 0 else employee_bill.total_amount, 'employee':{'id': employee_bill.id, 'name': employee_bill.employee.name}, 'data':bill_data}, safe=False, status=201)
+
+
+    # to show grand total
+    grand_total = 0
+    for i in bill_data:
+        grand_total += i['amount']
+
+    return JsonResponse({'date': employee_bill.created_at.strftime("%d %b %y"), 'grand_total': int(grand_total) if grand_total % 1 == 0 else grand_total, 'employee':{'id': employee_bill.employee.id, 'name': employee_bill.employee.name}, 'data':bill_data}, safe=False, status=201)

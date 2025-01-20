@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.db.utils import IntegrityError
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import Category, Product
+from ..models import Category, Product, Production
 from ..serializer import ProductsSerializer
 import json
 
@@ -75,49 +75,64 @@ def UpdateProducts(request, pk):
 
 
 # def UpdateProducts(request):
-#
-#     #     return Response(serializer.data, status=status.HTTP_200_OK)
-#     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
-#
-#         print(data)
-#         pk = data.get('pk')
-#         print(f"pk {pk}")
-#         updateAll = data.get('updateAll')
-#
-#         products = get_object_or_404(Product, pk=pk)
-#
-#         if updateAll == True:
-#     #         update all
-#             print(f"updateAll {updateAll}")
-#             pass
-#         else:
-#             # single update
-#             print(f"updateAll {updateAll}")
-#             pass
-#
-#         print(f"id: {products.id}, name: {products.name}, rate: {products.rate}, production_cost: {products.production_cost}, other_cost: {products.other_cost}, category: {products.category}")
-#
-#
-#         rate = data.get('rate')
-#         production_cost = data.get('production_cost')
-#         products.production_cost = production_cost
-#         products.rate = rate
-#         products.save()
-#         print("++++++++++++++ Updated +++++++++++++++++")
-#         print(f"id: {products.id}, name: {products.name}, rate: {products.rate}, production_cost: {products.production_cost}, other_cost: {products.other_cost}, category: {products.category}")
-#
-#
-#         return JsonResponse( {'messagge': "done"} ,status=200)
-#
-#     else:
-#         return JsonResponse({'error': 'Invalid request method.'}, status=405)
+
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    # if request.method == 'POST':
+    #     try:
+    #         data = json.loads(request.body)
+    #     except json.JSONDecodeError:
+    #         return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+    #
+    #     # get data
+    #     pk = data.get('pk')
+    #     updateAll = data.get('updateAll')
+    #     name = data.get('name')
+    #     rate = data.get('rate')
+    #     production_cost = data.get('production_cost')
+    #     other_cost = data.get('other_cost')
+    #     category = data.get('category')
+    #
+    #     # get product instincts
+    #     product = get_object_or_404(Product, pk=pk)
+    #
+    #     # set data
+    #     if name:
+    #         product.name = name
+    #     if rate:
+    #         product.rate = rate
+    #     if production_cost:
+    #         product.production_cost = production_cost
+    #     if other_cost:
+    #         product.other_cost = other_cost
+    #     if category:
+    #         product.category = category
+    #
+    #     product.save()      # save data
+    #
+    #     # update all data
+    #     if updateAll == True:
+    #         productions = Production.objects.filter(product=product)
+    #         for production in productions:
+    #             production_instinct = get_object_or_404(Production, pk=production.id)
+    #             production_instinct.product = product
+    #             production_instinct.rate = product.production_cost
+    #             production_instinct.save()
+    #
+    #     # dont change other related products value
+    #     else:
+    #         print(f"updateAll {updateAll}")
+    #         pass
+    #
+    #
+    #
+    #
+    #     return JsonResponse( {'messagge': "done"} ,status=200)
+    #
+    # else:
+    #     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 # =======================

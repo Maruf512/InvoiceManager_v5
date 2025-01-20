@@ -1,7 +1,7 @@
 from django.db import models
-from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.shortcuts import get_object_or_404
+from django.dispatch import receiver
+
 
 class Category(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -57,18 +57,6 @@ class Production(models.Model):
     class Meta:
         managed = False
         db_table = 'production'
-
-
-@receiver(post_save, sender=Product)
-def product_update_trigger(sender, instance, **kwargs):
-    product = get_object_or_404(Product, pk=instance.id)
-    productions = Production.objects.filter(product=product)
-    for production in productions:
-        production_instinct = get_object_or_404(Production, pk=production.id)
-        production_instinct.product = product
-        production_instinct.rate = product.production_cost
-        production_instinct.save()
-
 
 
 class Inventory(models.Model):

@@ -42,7 +42,7 @@ def EmployeeBillFilter(request):
 
             for item in production_records:
                 # Handle Decimal Points
-                rate = int(item.rate) if item.rate % 1 == 0 else item.rate
+                rate = int(item.product.rate) if item.product.rate % 1 == 0 else item.product.rate
                 quantity = int(item.quantity) if item.quantity % 1 == 0 else item.quantity
 
                 filtered_data.append({
@@ -93,7 +93,7 @@ def EmployeeBillFilter(request):
                 # Process records if found
                 for item in challan_production_records:
                     quantity = int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity
-                    rate = int(item.production.rate) if item.production.rate % 1 == 0 else item.production.rate
+                    rate = int(item.production.product.rate) if item.production.product.rate % 1 == 0 else item.production.product.rate
 
                     filtered_data.append({
                         'id': item.production.id,
