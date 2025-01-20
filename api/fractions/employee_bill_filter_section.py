@@ -106,10 +106,10 @@ def EmployeeBillFilter(request):
                             'name': item.production.product.name,
                             'category': item.production.product.category.name
                         },
-                        'date': item.challan.created_at.strftime("%d %b %y"),
                         'quantity': f"{quantity} { item.production.product.category.unit}",
                         'rate': rate,
-                        'amount': quantity * rate
+                        'amount': quantity * rate,
+                        'date': item.challan.created_at.strftime("%d %b %y")
                     })
 
         # Return filtered data or a message if no data found

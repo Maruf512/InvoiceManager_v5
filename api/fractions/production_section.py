@@ -57,7 +57,8 @@ def ViewProduction(request, pk):
         filter_records = query[offset:to_value]
         if isinstance(number_of_pages, float):
             number_of_pages = int(number_of_pages) + 1
-        
+
+
         for i in filter_records:
             data.append({'id': i.id, 'product':{'id': i.product.id, 'name':i.product.name, 'rate':i.rate}, "employee":{'id':i.employee.id, 'name':i.employee.name}, "quantity":f"{int(i.quantity) if i.quantity % 1 == 0 else i.quantity} {i.product.category.unit}", 'rate': i.rate, 'payment':i.payment,'date': i.created_at.date().strftime("%d %b %y")})
 

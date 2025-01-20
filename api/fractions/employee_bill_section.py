@@ -51,7 +51,7 @@ def AddEmployeeBill(request):
                     product=product_instinct,
                     production=production_instinct,
                     rate=item.get('rate', 0),
-                    quantity=int(item.get('quantity', 0)[:3]),
+                    quantity=float(item.get('quantity', 0)[:-3]),
                     amount=item.get('amount', 0)
                 )
 

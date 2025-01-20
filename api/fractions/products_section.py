@@ -64,6 +64,7 @@ def ViewProducts(request, pk):
 # =======================
 # ===== Update Products
 # =======================
+
 def UpdateProducts(request, pk):
     products = get_object_or_404(Product, pk=pk)
     serializer = ProductsSerializer(products, data=request.data)
@@ -71,6 +72,52 @@ def UpdateProducts(request, pk):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# def UpdateProducts(request):
+#
+#     #     return Response(serializer.data, status=status.HTTP_200_OK)
+#     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)
+#         except json.JSONDecodeError:
+#             return JsonResponse({'error': 'Invalid JSON data.'}, status=400)
+#
+#         print(data)
+#         pk = data.get('pk')
+#         print(f"pk {pk}")
+#         updateAll = data.get('updateAll')
+#
+#         products = get_object_or_404(Product, pk=pk)
+#
+#         if updateAll == True:
+#     #         update all
+#             print(f"updateAll {updateAll}")
+#             pass
+#         else:
+#             # single update
+#             print(f"updateAll {updateAll}")
+#             pass
+#
+#         print(f"id: {products.id}, name: {products.name}, rate: {products.rate}, production_cost: {products.production_cost}, other_cost: {products.other_cost}, category: {products.category}")
+#
+#
+#         rate = data.get('rate')
+#         production_cost = data.get('production_cost')
+#         products.production_cost = production_cost
+#         products.rate = rate
+#         products.save()
+#         print("++++++++++++++ Updated +++++++++++++++++")
+#         print(f"id: {products.id}, name: {products.name}, rate: {products.rate}, production_cost: {products.production_cost}, other_cost: {products.other_cost}, category: {products.category}")
+#
+#
+#         return JsonResponse( {'messagge': "done"} ,status=200)
+#
+#     else:
+#         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 
 # =======================
