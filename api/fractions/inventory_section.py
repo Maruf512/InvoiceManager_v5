@@ -65,7 +65,7 @@ def ViewInventory(request, pk):
                 'name': item.employee.name
             },
             'production': item.production.id,
-            'quantity': item.production.quantity,
+            'quantity': f"{int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity} {item.product.category.unit}",
             'status': item.current_status,
             'date': item.created_at.date().strftime("%d %b %y")
         })

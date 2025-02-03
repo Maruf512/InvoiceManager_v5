@@ -249,7 +249,7 @@ def SingleViewCashmemo(request, pk):
 
             return_data = []
             data = []
-            total_amount = 0
+            grand_total = 0
             for product, challan in challan_data.items():
                 for item in challan:
                     print(product, item)
@@ -264,8 +264,8 @@ def SingleViewCashmemo(request, pk):
                     for i in challan_production_instinct:
                         quantity += i['production__quantity']
 
-                    total_amount += int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)
-
+                    total_amount = int(product_instinct.rate * quantity) if (product_instinct.rate * quantity) % 1 == 0 else (product_instinct.rate * quantity)
+                    grand_total += total_amount
 
                     return_data.append({'challanid': challan_instinct.id,
                                         'products': f"{product_instinct.name}",
@@ -276,16 +276,12 @@ def SingleViewCashmemo(request, pk):
 
             return JsonResponse([{'customer': memo.customer.name, 'address': memo.customer.address,
                                   'date': memo.created_at.strftime("%d %b %y"), 'memo_id': memo.id,
-                                  'total_amount': total_amount,
+                                  'total_amount': grand_total,
                                   'total_after_discount': total_after_discount}] + return_data, safe=False, status=200)
         else:
             pass
 
-
-
-
         return JsonResponse({'message': 'Success'}, status=200)
-
 
     else:
         return JsonResponse({'error': 'Invalid request method.'}, status=405)

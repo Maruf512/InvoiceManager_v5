@@ -21,7 +21,7 @@ class Product(models.Model):
     rate = models.IntegerField()
     production_cost = models.FloatField(db_column='production_cost')
     other_cost = models.FloatField(default=0, db_column='other_cost')
-    category = models.ForeignKey(Category, models.RESTRICT, db_column='catagory_id')
+    category = models.ForeignKey(Category, models.CASCADE, db_column='catagory_id')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -49,7 +49,7 @@ class Production(models.Model):
     product = models.ForeignKey(Product, models.CASCADE, db_column='products_id')
     employee = models.ForeignKey(Employee, models.CASCADE)
     quantity = models.FloatField()
-    rate = models.FloatField()
+    rate = models.FloatField()              # remove
     payment = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -76,7 +76,7 @@ class Inventory(models.Model):
 class EmployeeBill(models.Model):
     id = models.BigAutoField(primary_key=True)
     employee = models.ForeignKey(Employee, models.CASCADE, db_column='employee_id')
-    total_amount = models.FloatField()
+    total_amount = models.FloatField()      # remove
     current_status = models.CharField(max_length=50, default='NOT-PAID')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -99,8 +99,6 @@ class EmployeeBillProduction(models.Model):
     class Meta:
         db_table = 'employee_bill_production'  # Specify the table name explicitly
         managed = False  # Disable Django's management of this table
-
-
 
 
 class Customer(models.Model):
@@ -145,12 +143,11 @@ class ChallanProduction(models.Model):
         managed = False  # Disable Django's management of this table
 
 
-
 class CashMemo(models.Model):
     id = models.BigAutoField(primary_key=True)
     customer = models.ForeignKey(Customer, models.CASCADE)
     total_yds = models.BigIntegerField()
-    total_amount = models.BigIntegerField()
+    total_amount = models.BigIntegerField()         # remove
 
     discount = models.FloatField(max_length=100, default=0)
     total_after_discount = models.FloatField(max_length=100, default=0)
