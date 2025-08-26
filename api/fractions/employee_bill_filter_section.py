@@ -1,6 +1,6 @@
+from ..models import Production, Employee, ChallanProduction, Challan
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse, Http404
-from ..models import Production, Employee, ChallanProduction, Challan
 import json
 
 
@@ -42,7 +42,7 @@ def EmployeeBillFilter(request):
 
             for item in production_records:
                 # Handle Decimal Points
-                rate = int(item.product.rate) if item.product.rate % 1 == 0 else item.product.rate
+                rate = int(item.product.production_cost) if item.product.production_cost % 1 == 0 else item.product.production_cost
                 quantity = int(item.quantity) if item.quantity % 1 == 0 else item.quantity
 
                 filtered_data.append({
@@ -93,7 +93,7 @@ def EmployeeBillFilter(request):
                 # Process records if found
                 for item in challan_production_records:
                     quantity = int(item.production.quantity) if item.production.quantity % 1 == 0 else item.production.quantity
-                    rate = int(item.production.product.rate) if item.production.product.rate % 1 == 0 else item.production.product.rate
+                    rate = int(item.production.product.production_cost) if item.production.product.production_cost % 1 == 0 else item.production.product.production_cost
 
                     filtered_data.append({
                         'id': item.production.id,
